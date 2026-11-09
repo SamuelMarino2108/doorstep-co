@@ -19,6 +19,8 @@ public sealed class RoadLettersTests
     [Theory]
     [InlineData("")]
     [InlineData("n")]
+    [InlineData("s")]
+    [InlineData("e")]
     [InlineData("ab")]
     [InlineData("5")]
     [InlineData("#")]

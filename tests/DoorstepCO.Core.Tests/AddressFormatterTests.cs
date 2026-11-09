@@ -43,4 +43,18 @@ public sealed class AddressFormatterTests
 
         formatted.Should().Be("CL 59A BIS B 80 BIS 12");
     }
+
+    [Fact]
+    public void Format_AddressWithQuadrants_WritesRoadQuadrantInlineAndCrossQuadrantLast()
+    {
+        var address = new Address(
+            RoadType.Calle,
+            new RoadNumber(10, Quadrant: Quadrant.Sur),
+            new RoadNumber(5, Quadrant: Quadrant.Este),
+            20);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be("CL 10 SUR 5 20 ESTE");
+    }
 }

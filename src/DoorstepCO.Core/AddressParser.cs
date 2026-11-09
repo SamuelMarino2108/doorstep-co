@@ -22,12 +22,15 @@ public static class AddressParser
         var tokens = AddressTokenizer.Tokenize(input);
         var position = 0;
 
+        var quadrants = new List<(Quadrant Quadrant, bool WrittenOnRoad)>();
+
         if (!TryReadRoadType(tokens, ref position, out var roadType)
             || !TryReadRoadNumber(tokens, ref position, out var road))
         {
             return false;
         }
 
+        ReadQuadrant(tokens, ref position, writtenOnRoad: true, quadrants);
         SkipIf(tokens, ref position, PlateSeparatorKeywords.IsPlateSeparator);
 
         if (!TryReadRoadNumber(tokens, ref position, out var cross))
@@ -35,14 +38,27 @@ public static class AddressParser
             return false;
         }
 
+        ReadQuadrant(tokens, ref position, writtenOnRoad: false, quadrants);
         SkipIf(tokens, ref position, token => token == AddressTokenizer.Dash);
 
-        if (!TryReadNumber(tokens, ref position, out var plateNumber) || position != tokens.Count)
+        if (!TryReadNumber(tokens, ref position, out var plateNumber))
         {
             return false;
         }
 
-        address = new Address(roadType, road, cross, plateNumber);
+        ReadQuadrant(tokens, ref position, writtenOnRoad: false, quadrants);
+
+        if (position != tokens.Count
+            || !QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
+        {
+            return false;
+        }
+
+        address = new Address(
+            roadType,
+            road with { Quadrant = roadQuadrant },
+            cross with { Quadrant = crossQuadrant },
+            plateNumber);
         return true;
     }
 
@@ -78,6 +94,19 @@ public static class AddressParser
 
         road = new RoadNumber(number, letter, isBis, bisLetter);
         return true;
+    }
+
+    private static void ReadQuadrant(
+        IReadOnlyList<string> tokens,
+        ref int position,
+        bool writtenOnRoad,
+        List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants)
+    {
+        if (position < tokens.Count && QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+        {
+            quadrants.Add((quadrant, writtenOnRoad));
+            position++;
+        }
     }
 
     private static char? ReadLetter(IReadOnlyList<string> tokens, ref int position)

@@ -106,6 +106,48 @@ public sealed class AddressParserTests
         AddressFormatter.Format(address!).Should().Be(expected);
     }
 
+    [Fact]
+    public void TryParse_TrailingSurOnCarrera_AssignsSurToCross()
+    {
+        var parsed = AddressParser.TryParse("carrera 7 # 10-20 sur", out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(
+            RoadType.Carrera,
+            new RoadNumber(7),
+            new RoadNumber(10, Quadrant: Quadrant.Sur),
+            20));
+    }
+
+    [Theory]
+    [InlineData("calle 26 sur # 50-10", "CL 26 SUR 50 10")]
+    [InlineData("Calle 26 Sur # 50-10", "CL 26 SUR 50 10")]
+    [InlineData("cl 26 s # 50-10", "CL 26 SUR 50 10")]
+    [InlineData("calle 26 # 50-10 sur", "CL 26 SUR 50 10")]
+    [InlineData("calle 59 a bis b sur # 80-12", "CL 59A BIS B SUR 80 12")]
+    [InlineData("dg 40 s # 20-10", "DG 40 SUR 20 10")]
+    [InlineData("ac 26 s # 50-10", "AC 26 SUR 50 10")]
+    [InlineData("carrera 7 # 10-20 sur", "KR 7 10 20 SUR")]
+    [InlineData("kr 7 # 10 sur - 20", "KR 7 10 20 SUR")]
+    [InlineData("kr 7 sur # 10-20", "KR 7 10 20 SUR")]
+    [InlineData("tv 5 # 10-20 sur", "TV 5 10 20 SUR")]
+    [InlineData("carrera 5 este # 10-20", "KR 5 ESTE 10 20")]
+    [InlineData("kr 5 # 10-20 este", "KR 5 ESTE 10 20")]
+    [InlineData("ak 15 # 100-20 este", "AK 15 ESTE 100 20")]
+    [InlineData("calle 10 # 5-20 este", "CL 10 5 20 ESTE")]
+    [InlineData("calle 10 este # 5-20", "CL 10 5 20 ESTE")]
+    [InlineData("calle 10 sur # 5-20 este", "CL 10 SUR 5 20 ESTE")]
+    [InlineData("kr 5 e # 10-20 s", "KR 5 ESTE 10 20 SUR")]
+    [InlineData("av 68 sur # 13-45", "AV 68 SUR 13 45")]
+    [InlineData("av 68 # 13-45 sur", "AV 68 13 45 SUR")]
+    public void TryParse_QuadrantVariants_FormatsToStandardForm(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("59 # 80-12")]
@@ -124,6 +166,11 @@ public sealed class AddressParserTests
     [InlineData("calle 59 bis bis # 80-12")]
     [InlineData("calle 59 bis a b # 80-12")]
     [InlineData("calle 59 # 80-12 bis")]
+    [InlineData("calle sur # 50-10")]
+    [InlineData("calle 26 sur sur # 50-10")]
+    [InlineData("calle 26 sur # 50-10 sur")]
+    [InlineData("calle 26 # 50 sur - 10 sur")]
+    [InlineData("av 68 sur este # 13-45")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
         var parsed = AddressParser.TryParse(input, out var address);
