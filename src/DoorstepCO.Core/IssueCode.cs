@@ -21,4 +21,7 @@ public enum IssueCode
     /// "Calle 59 # 80-12 frente al parque".
     /// </summary>
     UnrecognizedText,
+
+    /// <summary>The road, the crossing road or the plate number is 0, e.g. "Calle 59 # 80-0".</summary>
+    ZeroNumber,
 }

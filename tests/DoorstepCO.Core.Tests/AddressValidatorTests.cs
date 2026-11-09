@@ -99,6 +99,21 @@ public sealed class AddressValidatorTests
         result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.RuralAddress, IssueCode.UnrecognizedText);
     }
 
+    [Theory]
+    [InlineData("calle 0 # 80-12")]
+    [InlineData("calle 59 # 0-12")]
+    [InlineData("calle 59 # 80-0")]
+    [InlineData("calle 59 # 80-00")]
+    [InlineData("calle 0 # 0-0")]
+    public void Validate_ZeroRoadCrossOrPlate_ReturnsSingleZeroNumberIssue(string input)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Address.Should().NotBeNull();
+        result.Confidence.Should().Be(0.6);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.ZeroNumber);
+    }
+
     [Fact]
     public void Validate_AnyIssue_HasMessage()
     {

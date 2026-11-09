@@ -42,6 +42,11 @@ public static class AddressValidator
                 IssueCode.UnrecognizedText, IssueMessages.For(IssueCode.UnrecognizedText, unrecognizedText)));
         }
 
+        if (address.Road.Number == 0 || address.Cross.Number == 0 || address.PlateNumber == 0)
+        {
+            issues.Add(Issue(IssueCode.ZeroNumber));
+        }
+
         return Result(address, issues);
     }
 
