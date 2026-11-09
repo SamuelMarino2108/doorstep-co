@@ -77,6 +77,35 @@ public sealed class AddressParserTests
         AddressFormatter.Format(address!).Should().Be(expected);
     }
 
+    [Fact]
+    public void TryParse_BisOnRoadAndCross_ReturnsBisAndLetters()
+    {
+        var parsed = AddressParser.TryParse("calle 59 a bis b # 80 bis - 12", out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(
+            RoadType.Calle,
+            new RoadNumber(59, 'A', IsBis: true, BisLetter: 'B'),
+            new RoadNumber(80, IsBis: true),
+            12));
+    }
+
+    [Theory]
+    [InlineData("calle 59 bis # 80-12", "CL 59 BIS 80 12")]
+    [InlineData("calle 59bis # 80-12", "CL 59 BIS 80 12")]
+    [InlineData("Calle 59 A Bis # 80-12", "CL 59A BIS 80 12")]
+    [InlineData("calle 59 bis c # 80-12", "CL 59 BIS C 80 12")]
+    [InlineData("CL 59A BIS B # 80-12", "CL 59A BIS B 80 12")]
+    [InlineData("kr 7 # 32 bis - 16", "KR 7 32 BIS 16")]
+    [InlineData("kr 7 # 32 a bis a - 16", "KR 7 32A BIS A 16")]
+    public void TryParse_BisVariants_FormatsToStandardForm(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("59 # 80-12")]
@@ -91,6 +120,10 @@ public sealed class AddressParserTests
     [InlineData("calle 59 a b # 80-12")]
     [InlineData("calle 59 # 80-12 a")]
     [InlineData("calle a # 80-12")]
+    [InlineData("calle bis # 80-12")]
+    [InlineData("calle 59 bis bis # 80-12")]
+    [InlineData("calle 59 bis a b # 80-12")]
+    [InlineData("calle 59 # 80-12 bis")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
         var parsed = AddressParser.TryParse(input, out var address);

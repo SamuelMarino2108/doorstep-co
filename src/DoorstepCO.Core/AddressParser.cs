@@ -67,15 +67,28 @@ public static class AddressParser
             return false;
         }
 
-        char? letter = null;
-        if (position < tokens.Count && RoadLetters.TryGetLetter(tokens[position], out var found))
+        var letter = ReadLetter(tokens, ref position);
+        var isBis = position < tokens.Count && BisKeywords.IsBis(tokens[position]);
+        char? bisLetter = null;
+        if (isBis)
         {
-            letter = found;
             position++;
+            bisLetter = ReadLetter(tokens, ref position);
         }
 
-        road = new RoadNumber(number, letter);
+        road = new RoadNumber(number, letter, isBis, bisLetter);
         return true;
+    }
+
+    private static char? ReadLetter(IReadOnlyList<string> tokens, ref int position)
+    {
+        if (position < tokens.Count && RoadLetters.TryGetLetter(tokens[position], out var letter))
+        {
+            position++;
+            return letter;
+        }
+
+        return null;
     }
 
     private static bool TryReadNumber(IReadOnlyList<string> tokens, ref int position, out int number)

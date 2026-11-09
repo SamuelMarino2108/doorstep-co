@@ -25,6 +25,19 @@ public static class AddressFormatter
             address.PlateNumber.ToString(CultureInfo.InvariantCulture));
     }
 
-    private static string FormatRoadNumber(RoadNumber road) =>
-        road.Number.ToString(CultureInfo.InvariantCulture) + road.Letter;
+    private static string FormatRoadNumber(RoadNumber road)
+    {
+        var parts = new List<string> { road.Number.ToString(CultureInfo.InvariantCulture) + road.Letter };
+        if (road.IsBis)
+        {
+            parts.Add(ModifierAbbreviations.Bis);
+        }
+
+        if (road.BisLetter is { } bisLetter)
+        {
+            parts.Add(bisLetter.ToString());
+        }
+
+        return string.Join(' ', parts);
+    }
 }

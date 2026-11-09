@@ -29,4 +29,18 @@ public sealed class AddressFormatterTests
 
         formatted.Should().Be("CL 59A 80B 12");
     }
+
+    [Fact]
+    public void Format_AddressWithBis_WritesBisAndBisLetter()
+    {
+        var address = new Address(
+            RoadType.Calle,
+            new RoadNumber(59, 'A', IsBis: true, BisLetter: 'B'),
+            new RoadNumber(80, IsBis: true),
+            12);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be("CL 59A BIS B 80 BIS 12");
+    }
 }
