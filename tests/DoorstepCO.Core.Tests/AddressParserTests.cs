@@ -150,6 +150,23 @@ public sealed class AddressParserTests
     }
 
     [Theory]
+    [InlineData("Avenida Calle 26 # 68-35", "AC 26 68 35")]
+    [InlineData("av. calle 26 # 68-35", "AC 26 68 35")]
+    [InlineData("Av Cll 26 # 68-35", "AC 26 68 35")]
+    [InlineData("avda cl 26 sur # 68-35", "AC 26 SUR 68 35")]
+    [InlineData("Avenida Carrera 15 # 100-20", "AK 15 100 20")]
+    [InlineData("av cra 15 # 100-20", "AK 15 100 20")]
+    [InlineData("Av. Kr 68 # 13-45", "AK 68 13 45")]
+    [InlineData("av carrera 30 # 1-30 sur", "AK 30 1 30 SUR")]
+    public void TryParse_CompoundAvenueVariants_FormatsToStandardForm(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("59 # 80-12")]
     [InlineData("calle # 80-12")]
@@ -172,6 +189,10 @@ public sealed class AddressParserTests
     [InlineData("calle 26 sur # 50-10 sur")]
     [InlineData("calle 26 # 50 sur - 10 sur")]
     [InlineData("av 68 sur este # 13-45")]
+    [InlineData("calle carrera 26 # 68-35")]
+    [InlineData("avenida avenida 26 # 68-35")]
+    [InlineData("av diagonal 40 # 20-10")]
+    [InlineData("av calle carrera 26 # 68-35")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
         var parsed = AddressParser.TryParse(input, out var address);

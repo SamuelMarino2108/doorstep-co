@@ -37,4 +37,28 @@ public sealed class RoadTypeKeywordsTests
 
         found.Should().BeFalse();
     }
+
+    [Theory]
+    [InlineData(RoadType.Avenida, RoadType.Calle, RoadType.AvenidaCalle)]
+    [InlineData(RoadType.Avenida, RoadType.Carrera, RoadType.AvenidaCarrera)]
+    public void TryCombine_AvenidaWithCalleOrCarrera_ReturnsCompoundRoadType(
+        RoadType first, RoadType second, RoadType expected)
+    {
+        var combined = RoadTypeKeywords.TryCombine(first, second, out var roadType);
+
+        combined.Should().BeTrue();
+        roadType.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(RoadType.Calle, RoadType.Carrera)]
+    [InlineData(RoadType.Avenida, RoadType.Avenida)]
+    [InlineData(RoadType.Avenida, RoadType.Diagonal)]
+    [InlineData(RoadType.Avenida, RoadType.AvenidaCalle)]
+    public void TryCombine_OtherPair_ReturnsFalse(RoadType first, RoadType second)
+    {
+        var combined = RoadTypeKeywords.TryCombine(first, second, out _);
+
+        combined.Should().BeFalse();
+    }
 }

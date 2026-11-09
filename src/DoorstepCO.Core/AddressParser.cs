@@ -71,6 +71,14 @@ public static class AddressParser
         }
 
         position++;
+        if (position < tokens.Count
+            && RoadTypeKeywords.TryGetRoadType(tokens[position], out var second)
+            && RoadTypeKeywords.TryCombine(roadType, second, out var compound))
+        {
+            roadType = compound;
+            position++;
+        }
+
         return true;
     }
 
