@@ -19,4 +19,14 @@ public sealed class AddressFormatterTests
 
         formatted.Should().Be(expected);
     }
+
+    [Fact]
+    public void Format_AddressWithLetters_AppendsLettersToNumbers()
+    {
+        var address = new Address(RoadType.Calle, new RoadNumber(59, 'A'), new RoadNumber(80, 'B'), 12);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be("CL 59A 80B 12");
+    }
 }

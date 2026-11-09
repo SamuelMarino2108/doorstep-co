@@ -20,6 +20,15 @@ public sealed class AddressParserTests
         address.Should().Be(new Address(roadType, new RoadNumber(roadNumber), new RoadNumber(crossNumber), plateNumber));
     }
 
+    [Fact]
+    public void TryParse_LettersOnRoadAndCross_ReturnsLetters()
+    {
+        var parsed = AddressParser.TryParse("calle 59a # 80 b - 12", out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(RoadType.Calle, new RoadNumber(59, 'A'), new RoadNumber(80, 'B'), 12));
+    }
+
     [Theory]
     [InlineData("calle 59 # 80-12", "CL 59 80 12")]
     [InlineData("Calle 59 #80-12", "CL 59 80 12")]
@@ -54,6 +63,21 @@ public sealed class AddressParserTests
     }
 
     [Theory]
+    [InlineData("calle 59a # 80-12", "CL 59A 80 12")]
+    [InlineData("Calle 59 A # 80-12", "CL 59A 80 12")]
+    [InlineData("calle 59A #80B-12", "CL 59A 80B 12")]
+    [InlineData("kr 7 # 32 c - 16", "KR 7 32C 16")]
+    [InlineData("cl 26 b 32 10", "CL 26B 32 10")]
+    [InlineData("kr 7 n 32 16", "KR 7 32 16")]
+    public void TryParse_LetterVariants_FormatsToStandardForm(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("59 # 80-12")]
     [InlineData("calle # 80-12")]
@@ -63,6 +87,10 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12-5")]
     [InlineData("calle abc # 80-12")]
     [InlineData("calle 99999999999 # 80-12")]
+    [InlineData("calle 59 ab # 80-12")]
+    [InlineData("calle 59 a b # 80-12")]
+    [InlineData("calle 59 # 80-12 a")]
+    [InlineData("calle a # 80-12")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
         var parsed = AddressParser.TryParse(input, out var address);

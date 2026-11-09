@@ -23,14 +23,14 @@ public static class AddressParser
         var position = 0;
 
         if (!TryReadRoadType(tokens, ref position, out var roadType)
-            || !TryReadNumber(tokens, ref position, out var roadNumber))
+            || !TryReadRoadNumber(tokens, ref position, out var road))
         {
             return false;
         }
 
         SkipIf(tokens, ref position, PlateSeparatorKeywords.IsPlateSeparator);
 
-        if (!TryReadNumber(tokens, ref position, out var crossNumber))
+        if (!TryReadRoadNumber(tokens, ref position, out var cross))
         {
             return false;
         }
@@ -42,7 +42,7 @@ public static class AddressParser
             return false;
         }
 
-        address = new Address(roadType, new RoadNumber(roadNumber), new RoadNumber(crossNumber), plateNumber);
+        address = new Address(roadType, road, cross, plateNumber);
         return true;
     }
 
@@ -55,6 +55,26 @@ public static class AddressParser
         }
 
         position++;
+        return true;
+    }
+
+    private static bool TryReadRoadNumber(
+        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)
+    {
+        road = null;
+        if (!TryReadNumber(tokens, ref position, out var number))
+        {
+            return false;
+        }
+
+        char? letter = null;
+        if (position < tokens.Count && RoadLetters.TryGetLetter(tokens[position], out var found))
+        {
+            letter = found;
+            position++;
+        }
+
+        road = new RoadNumber(number, letter);
         return true;
     }
 
