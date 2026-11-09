@@ -35,6 +35,11 @@ public static class AddressFormatter
 
     private static string FormatRoadNumber(RoadNumber road)
     {
+        if (road.Name is { } name)
+        {
+            return name;
+        }
+
         var parts = new List<string> { road.Number.ToString(CultureInfo.InvariantCulture) + road.Letter };
         if (road.IsBis)
         {

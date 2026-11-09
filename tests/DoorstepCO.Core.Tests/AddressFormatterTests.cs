@@ -97,4 +97,15 @@ public sealed class AddressFormatterTests
 
         formatted.Should().Be("CRA 7 10 20 SUR TO 2 AP 302");
     }
+
+    [Fact]
+    public void Format_AddressWithNamedRoad_WritesNameInsteadOfNumber()
+    {
+        var address = new Address(
+            RoadType.Avenida, new RoadNumber(0, Quadrant: Quadrant.Sur, Name: "EL POBLADO"), new RoadNumber(30), 28);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be("AV EL POBLADO SUR 30 28");
+    }
 }

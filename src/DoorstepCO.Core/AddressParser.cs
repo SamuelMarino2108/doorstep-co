@@ -43,7 +43,7 @@ public static class AddressParser
         var quadrants = new List<(Quadrant Quadrant, bool WrittenOnRoad)>();
 
         if (!TryReadRoadType(tokens, ref position, out var roadType)
-            || !TryReadRoadNumber(tokens, ref position, out var road))
+            || !TryReadRoad(tokens, ref position, ref roadType, quadrants, out var road))
         {
             return false;
         }
@@ -104,6 +104,62 @@ public static class AddressParser
 
         return true;
     }
+
+    private static bool TryReadRoad(
+        IReadOnlyList<string> tokens,
+        ref int position,
+        ref RoadType roadType,
+        List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants,
+        [NotNullWhen(true)] out RoadNumber? road)
+    {
+        if (TryReadRoadNumber(tokens, ref position, out road))
+        {
+            return true;
+        }
+
+        if (roadType != RoadType.Avenida)
+        {
+            return false;
+        }
+
+        var name = ReadName(tokens, ref position);
+        if (name.Length == 0)
+        {
+            return false;
+        }
+
+        if (!NamedAvenues.TryGetRoad(name, out var namedType, out var namedRoad))
+        {
+            road = new RoadNumber(0, Name: name.ToUpperInvariant());
+            return true;
+        }
+
+        roadType = namedType;
+        if (namedRoad.Quadrant is { } quadrant)
+        {
+            quadrants.Add((quadrant, WrittenOnRoad: true));
+        }
+
+        road = namedRoad with { Quadrant = null };
+        return true;
+    }
+
+    private static string ReadName(IReadOnlyList<string> tokens, ref int position)
+    {
+        var words = new List<string>();
+        while (position < tokens.Count && IsNameWord(tokens[position]))
+        {
+            words.Add(tokens[position]);
+            position++;
+        }
+
+        return string.Join(' ', words);
+    }
+
+    private static bool IsNameWord(string token) =>
+        char.IsLetter(token[0])
+        && !PlateSeparatorKeywords.IsPlateSeparator(token)
+        && !QuadrantKeywords.TryGetQuadrant(token, out _);
 
     private static bool TryReadRoadNumber(
         IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)

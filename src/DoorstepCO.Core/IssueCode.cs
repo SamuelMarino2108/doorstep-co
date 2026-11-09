@@ -27,4 +27,10 @@ public enum IssueCode
 
     /// <summary>The plate number is suspiciously high, e.g. "Calle 59 # 80-850".</summary>
     PlateNumberOutOfRange,
+
+    /// <summary>
+    /// The main road is designated by a name that could not be matched to its standard number, e.g.
+    /// "Av. El Poblado # 30-28".
+    /// </summary>
+    NamedRoad,
 }

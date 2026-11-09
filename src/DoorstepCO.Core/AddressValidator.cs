@@ -42,7 +42,8 @@ public static class AddressValidator
                 IssueCode.UnrecognizedText, IssueMessages.For(IssueCode.UnrecognizedText, unrecognizedText)));
         }
 
-        if (address.Road.Number == 0 || address.Cross.Number == 0 || address.PlateNumber == 0)
+        var roadIsZero = address.Road.Number == 0 && address.Road.Name is null;
+        if (roadIsZero || address.Cross.Number == 0 || address.PlateNumber == 0)
         {
             issues.Add(Issue(IssueCode.ZeroNumber));
         }
@@ -50,6 +51,11 @@ public static class AddressValidator
         if (address.PlateNumber > AddressLimits.MaxPlateNumber)
         {
             issues.Add(Issue(IssueCode.PlateNumberOutOfRange));
+        }
+
+        if (address.Road.Name is not null)
+        {
+            issues.Add(Issue(IssueCode.NamedRoad));
         }
 
         return Result(address, issues);

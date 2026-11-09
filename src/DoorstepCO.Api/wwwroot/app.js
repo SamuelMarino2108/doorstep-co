@@ -12,6 +12,7 @@ const issueTexts = {
     },
     ZeroNumber: () => "La vía, el cruce o la placa es 0.",
     PlateNumberOutOfRange: () => "El número de placa es demasiado alto.",
+    NamedRoad: () => "La vía está escrita por su nombre y no se conoce su número oficial. Revisa que exista.",
 };
 
 const severeIssues = new Set(["Empty", "Unparseable", "RuralAddress"]);
@@ -155,7 +156,7 @@ function componentsOf(address) {
 }
 
 function formatRoad(road) {
-    const parts = [`${road.number}${road.letter ?? ""}`];
+    const parts = [road.name ?? `${road.number}${road.letter ?? ""}`];
     if (road.isBis) {
         parts.push(road.bisLetter ? `BIS ${road.bisLetter}` : "BIS");
     }
