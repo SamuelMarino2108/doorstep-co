@@ -10,4 +10,7 @@ public enum BatchError
 
     /// <summary>The header row has no DIRECCION column.</summary>
     MissingAddressColumn,
+
+    /// <summary>The file could not be opened as a spreadsheet.</summary>
+    UnreadableFile,
 }
