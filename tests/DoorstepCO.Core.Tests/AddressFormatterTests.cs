@@ -4,7 +4,7 @@ public sealed class AddressFormatterTests
 {
     [Theory]
     [InlineData(RoadType.Calle, 59, 80, 12, "CL 59 80 12")]
-    [InlineData(RoadType.Carrera, 7, 32, 16, "KR 7 32 16")]
+    [InlineData(RoadType.Carrera, 7, 32, 16, "CRA 7 32 16")]
     [InlineData(RoadType.Diagonal, 40, 20, 10, "DG 40 20 10")]
     [InlineData(RoadType.Transversal, 5, 10, 20, "TV 5 10 20")]
     [InlineData(RoadType.Avenida, 68, 13, 45, "AV 68 13 45")]
@@ -95,6 +95,6 @@ public sealed class AddressFormatterTests
 
         var formatted = AddressFormatter.Format(address);
 
-        formatted.Should().Be("KR 7 10 20 SUR TO 2 AP 302");
+        formatted.Should().Be("CRA 7 10 20 SUR TO 2 AP 302");
     }
 }
