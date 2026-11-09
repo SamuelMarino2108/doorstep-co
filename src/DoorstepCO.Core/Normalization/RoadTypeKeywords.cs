@@ -1,7 +1,8 @@
 namespace DoorstepCO.Core.Normalization;
 
 /// <summary>
-/// Maps normalized road type keywords (lowercase, no accents, no dots) to <see cref="RoadType"/>.
+/// Maps normalized road type keywords (lowercase, no accents, no dots) to <see cref="RoadType"/>, and pairs
+/// of road types written together (such as "avenida calle") to their compound road type.
 /// </summary>
 internal static class RoadTypeKeywords
 {
@@ -22,6 +23,7 @@ internal static class RoadTypeKeywords
         ["diagonal"] = RoadType.Diagonal,
         ["diag"] = RoadType.Diagonal,
         ["dg"] = RoadType.Diagonal,
+        ["dgn"] = RoadType.Diagonal,
 
         ["transversal"] = RoadType.Transversal,
         ["transv"] = RoadType.Transversal,
@@ -32,11 +34,21 @@ internal static class RoadTypeKeywords
         ["avenida"] = RoadType.Avenida,
         ["avda"] = RoadType.Avenida,
         ["av"] = RoadType.Avenida,
+        ["ave"] = RoadType.Avenida,
 
         ["ac"] = RoadType.AvenidaCalle,
         ["ak"] = RoadType.AvenidaCarrera,
     };
 
+    private static readonly Dictionary<(RoadType First, RoadType Second), RoadType> _compounds = new()
+    {
+        [(RoadType.Avenida, RoadType.Calle)] = RoadType.AvenidaCalle,
+        [(RoadType.Avenida, RoadType.Carrera)] = RoadType.AvenidaCarrera,
+    };
+
     public static bool TryGetRoadType(string keyword, out RoadType roadType) =>
         _keywords.TryGetValue(keyword, out roadType);
+
+    public static bool TryCombine(RoadType first, RoadType second, out RoadType compound) =>
+        _compounds.TryGetValue((first, second), out compound);
 }

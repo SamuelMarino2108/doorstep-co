@@ -22,27 +22,43 @@ public static class AddressParser
         var tokens = AddressTokenizer.Tokenize(input);
         var position = 0;
 
+        var quadrants = new List<(Quadrant Quadrant, bool WrittenOnRoad)>();
+
         if (!TryReadRoadType(tokens, ref position, out var roadType)
-            || !TryReadNumber(tokens, ref position, out var roadNumber))
+            || !TryReadRoadNumber(tokens, ref position, out var road))
         {
             return false;
         }
 
+        ReadQuadrants(tokens, ref position, writtenOnRoad: true, quadrants);
         SkipIf(tokens, ref position, PlateSeparatorKeywords.IsPlateSeparator);
 
-        if (!TryReadNumber(tokens, ref position, out var crossNumber))
+        if (!TryReadRoadNumber(tokens, ref position, out var cross))
         {
             return false;
         }
 
+        ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
         SkipIf(tokens, ref position, token => token == AddressTokenizer.Dash);
 
-        if (!TryReadNumber(tokens, ref position, out var plateNumber) || position != tokens.Count)
+        if (!TryReadNumber(tokens, ref position, out var plateNumber))
         {
             return false;
         }
 
-        address = new Address(roadType, roadNumber, crossNumber, plateNumber);
+        ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
+
+        if (position != tokens.Count
+            || !QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
+        {
+            return false;
+        }
+
+        address = new Address(
+            roadType,
+            road with { Quadrant = roadQuadrant },
+            cross with { Quadrant = crossQuadrant },
+            plateNumber);
         return true;
     }
 
@@ -55,7 +71,61 @@ public static class AddressParser
         }
 
         position++;
+        if (position < tokens.Count
+            && RoadTypeKeywords.TryGetRoadType(tokens[position], out var second)
+            && RoadTypeKeywords.TryCombine(roadType, second, out var compound))
+        {
+            roadType = compound;
+            position++;
+        }
+
         return true;
+    }
+
+    private static bool TryReadRoadNumber(
+        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)
+    {
+        road = null;
+        if (!TryReadNumber(tokens, ref position, out var number))
+        {
+            return false;
+        }
+
+        var letter = ReadLetter(tokens, ref position);
+        var isBis = position < tokens.Count && BisKeywords.IsBis(tokens[position]);
+        char? bisLetter = null;
+        if (isBis)
+        {
+            position++;
+            bisLetter = ReadLetter(tokens, ref position);
+        }
+
+        road = new RoadNumber(number, letter, isBis, bisLetter);
+        return true;
+    }
+
+    private static void ReadQuadrants(
+        IReadOnlyList<string> tokens,
+        ref int position,
+        bool writtenOnRoad,
+        List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants)
+    {
+        while (position < tokens.Count && QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+        {
+            quadrants.Add((quadrant, writtenOnRoad));
+            position++;
+        }
+    }
+
+    private static char? ReadLetter(IReadOnlyList<string> tokens, ref int position)
+    {
+        if (position < tokens.Count && RoadLetters.TryGetLetter(tokens[position], out var letter))
+        {
+            position++;
+            return letter;
+        }
+
+        return null;
     }
 
     private static bool TryReadNumber(IReadOnlyList<string> tokens, ref int position, out int number)
