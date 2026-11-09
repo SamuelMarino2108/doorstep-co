@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Doorstep CO</title>
+    <meta name="description" content="Normaliza y valida direcciones colombianas antes de despachar.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%230f766e' d='M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="masthead">
+        <div class="brand">
+            <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/>
+            </svg>
+            <span>Doorstep CO</span>
+        </div>
+        <h1>Direcciones listas para despachar</h1>
+        <p class="lede">Normaliza y valida direcciones colombianas. Detecta las que pueden fallar antes de que salga el envío.</p>
+    </header>
+
+    <main class="cards">
+        <section class="card" aria-labelledby="single-title">
+            <h2 id="single-title">Una dirección</h2>
+            <form id="single-form" class="single-form">
+                <label for="address" class="visually-hidden">Dirección</label>
+                <input id="address" name="address" type="text" autocomplete="off" spellcheck="false"
+                       placeholder="cll 59 a bis sur # 80-12 apto 302" required>
+                <button type="submit" class="button primary">Normalizar</button>
+            </form>
+            <div class="examples">
+                <span>Prueba:</span>
+                <button type="button" class="chip" data-example="cra 7 # 10-20 torre 2 apto 302">cra 7 # 10-20 torre 2 apto 302</button>
+                <button type="button" class="chip" data-example="Av. Calle 26 No. 68B-31">Av. Calle 26 No. 68B-31</button>
+                <button type="button" class="chip" data-example="vereda el salitre finca la esperanza">vereda el salitre finca la esperanza</button>
+            </div>
+
+            <div id="single-result" class="result" hidden>
+                <div class="normalized-row">
+                    <output id="normalized" class="normalized"></output>
+                    <button type="button" id="copy" class="button ghost">Copiar</button>
+                </div>
+                <div class="confidence">
+                    <div class="confidence-label">
+                        <span>Confianza</span>
+                        <strong id="confidence-value"></strong>
+                    </div>
+                    <div class="meter" role="presentation"><div id="confidence-bar" class="meter-fill"></div></div>
+                </div>
+                <ul id="issues" class="issues"></ul>
+                <dl id="components" class="components"></dl>
+            </div>
+            <p id="single-error" class="error" role="alert" hidden></p>
+        </section>
+
+        <section class="card" aria-labelledby="batch-title">
+            <h2 id="batch-title">Archivo completo</h2>
+            <p class="hint">
+                Sube un <strong>.csv</strong> o <strong>.xlsx</strong> con una columna <code>DIRECCION</code>.
+                Te devolvemos el mismo archivo con una columna <code>NORMALIZADA</code> al final.
+            </p>
+            <label id="dropzone" class="dropzone" for="file">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <span id="dropzone-text"><strong>Arrastra tu archivo aquí</strong> o haz clic para elegirlo</span>
+                <input id="file" type="file" accept=".csv,.xlsx" class="visually-hidden">
+            </label>
+            <button type="button" id="process" class="button primary wide" disabled>Procesar archivo</button>
+            <p id="batch-status" class="status" role="status" hidden></p>
+            <p id="batch-error" class="error" role="alert" hidden></p>
+        </section>
+    </main>
+
+    <footer class="footer">Las direcciones se procesan en este servidor y no se guardan.</footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

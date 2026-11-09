@@ -14,7 +14,7 @@ Goal: catch bad addresses before a shipment is dispatched, reducing failed deliv
 
 - .NET 8 (C# 12), nullable reference types enabled, implicit usings enabled
 - `DoorstepCO.Core`: class library, published as a NuGet package, **zero external dependencies**
-- `DoorstepCO.Api`: ASP.NET Core Minimal API, Swagger/OpenAPI
+- `DoorstepCO.Api`: ASP.NET Core Minimal API, Swagger/OpenAPI, ClosedXML for `.xlsx` files, static web UI in `wwwroot`
 - Tests: xUnit + FluentAssertions
 - CI: GitHub Actions (restore, build, test on every push and PR)
 - Docker for the API
@@ -105,5 +105,6 @@ Do not add new projects or top-level folders without asking first.
 3. Modifiers: letters, BIS, Sur/Este, compound avenues, keyword variants
 4. Complements: apartment, tower, interior, block, house, manzana, lote, conjunto
 5. Validation: issues list and confidence score; rural addresses flagged as non-standard
-6. API: `POST /normalize`, `POST /normalize/batch` (CSV in → CSV out), Swagger, Dockerfile
+6. API: `POST /normalize`, `POST /normalize/batch` (`.csv` or `.xlsx` with a `DIRECCION` column in → same file
+   with a `NORMALIZADA` column out), web UI, Swagger, Dockerfile
 7. Release: NuGet package, README with examples and badges
