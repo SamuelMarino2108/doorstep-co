@@ -9,42 +9,57 @@ namespace DoorstepCO.Core.Parsing;
 /// that is itself a complement keyword ("t" in "apto 302 t 2") starts the next complement instead.
 /// A conjunto takes a name instead: every word up to the next complement keyword ("los pinos" in
 /// "conjunto los pinos torre 2").
+/// Reading stops at the first token that does not start a complete complement; the caller decides what to do with
+/// the rest.
 /// </summary>
 internal static class ComplementReader
 {
-    public static bool TryReadAll(
-        IReadOnlyList<string> tokens, int position, [NotNullWhen(true)] out IReadOnlyList<Complement>? complements)
+    public static int ReadValid(IReadOnlyList<string> tokens, int position, out IReadOnlyList<Complement> complements)
     {
-        complements = null;
         var read = new List<Complement>();
         while (position < tokens.Count)
         {
-            if (!ComplementKeywords.TryGetComplementType(tokens[position], out var type))
+            var start = position;
+            if (!TryReadOne(tokens, ref position, out var complement))
             {
-                return false;
+                position = start;
+                break;
             }
 
-            position++;
-            if (type == ComplementType.Conjunto
-                && position < tokens.Count
-                && ComplementKeywords.IsResidential(tokens[position]))
-            {
-                type = ComplementType.ConjuntoResidencial;
-                position++;
-            }
-
-            var hasValue = type is ComplementType.Conjunto or ComplementType.ConjuntoResidencial
-                ? TryReadName(tokens, ref position, out var value)
-                : TryReadValue(tokens, ref position, out value);
-            if (!hasValue)
-            {
-                return false;
-            }
-
-            read.Add(new Complement(type, value));
+            read.Add(complement);
         }
 
         complements = read.ToArray();
+        return position;
+    }
+
+    private static bool TryReadOne(
+        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out Complement? complement)
+    {
+        complement = null;
+        if (!ComplementKeywords.TryGetComplementType(tokens[position], out var type))
+        {
+            return false;
+        }
+
+        position++;
+        if (type == ComplementType.Conjunto
+            && position < tokens.Count
+            && ComplementKeywords.IsResidential(tokens[position]))
+        {
+            type = ComplementType.ConjuntoResidencial;
+            position++;
+        }
+
+        var hasValue = type is ComplementType.Conjunto or ComplementType.ConjuntoResidencial
+            ? TryReadName(tokens, ref position, out var value)
+            : TryReadValue(tokens, ref position, out value);
+        if (!hasValue)
+        {
+            return false;
+        }
+
+        complement = new Complement(type, value);
         return true;
     }
 
