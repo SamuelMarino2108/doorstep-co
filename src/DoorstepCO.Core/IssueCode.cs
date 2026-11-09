@@ -10,4 +10,10 @@ public enum IssueCode
 
     /// <summary>The input could not be parsed as an urban address.</summary>
     Unparseable,
+
+    /// <summary>
+    /// Text after the address was not recognized and was ignored, e.g. "frente al parque" in
+    /// "Calle 59 # 80-12 frente al parque".
+    /// </summary>
+    UnrecognizedText,
 }

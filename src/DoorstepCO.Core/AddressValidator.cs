@@ -22,12 +22,19 @@ public static class AddressValidator
             return Result(null, [Issue(IssueCode.Empty)]);
         }
 
-        if (!AddressParser.TryParse(input, out var address))
+        if (!AddressParser.TryParse(input, out var address, out var unrecognizedText))
         {
             return Result(null, [Issue(IssueCode.Unparseable)]);
         }
 
-        return Result(address, []);
+        var issues = new List<AddressIssue>();
+        if (unrecognizedText.Length > 0)
+        {
+            issues.Add(new AddressIssue(
+                IssueCode.UnrecognizedText, IssueMessages.For(IssueCode.UnrecognizedText, unrecognizedText)));
+        }
+
+        return Result(address, issues);
     }
 
     private static AddressIssue Issue(IssueCode code) => new(code, IssueMessages.For(code));

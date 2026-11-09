@@ -9,6 +9,9 @@ internal static class IssueMessages
     {
         IssueCode.Empty => "The address is empty.",
         IssueCode.Unparseable => "The address could not be recognized as an urban address.",
+        IssueCode.UnrecognizedText => "Text after the address was not recognized and was ignored.",
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
+
+    public static string For(IssueCode code, string detail) => $"{For(code)} \"{detail}\"";
 }
