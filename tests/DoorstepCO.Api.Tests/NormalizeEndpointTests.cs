@@ -39,6 +39,18 @@ public sealed class NormalizeEndpointTests : IClassFixture<WebApplicationFactory
     }
 
     [Fact]
+    public async Task PostNormalize_UnknownNamedAvenue_ReturnsRoadName()
+    {
+        var response = await _client.PostAsJsonAsync("/normalize", new { Address = "av el poblado # 30-28" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        body.RootElement.GetProperty("address").GetProperty("road").GetProperty("name").GetString()
+            .Should().Be("EL POBLADO");
+        body.RootElement.GetProperty("issues")[0].GetProperty("code").GetString().Should().Be("NamedRoad");
+    }
+
+    [Fact]
     public async Task PostNormalize_MissingAddress_ReturnsBadRequest()
     {
         var response = await _client.PostAsJsonAsync("/normalize", new { });
