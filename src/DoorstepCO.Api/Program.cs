@@ -18,6 +18,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapGet("/health", () => Results.Ok(new { Status = "ok" }))
     .WithName("GetHealth")
     .WithTags("Health");
