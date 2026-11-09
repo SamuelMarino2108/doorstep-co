@@ -410,4 +410,39 @@ public sealed class AddressParserTests
         parsed.Should().BeTrue();
         AddressFormatter.Format(address!).Should().Be(expected);
     }
+
+    [Theory]
+    [InlineData("av el poblado # 30-28", "EL POBLADO", 30, 28)]
+    [InlineData("Avenida Las Américas No. 68-20", "LAS AMERICAS", 68, 20)]
+    [InlineData("av suba 115 50", "SUBA", 115, 50)]
+    public void TryParse_UnknownNamedAvenue_KeepsName(string input, string name, int crossNumber, int plateNumber)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(
+            RoadType.Avenida, new RoadNumber(0, Name: name), new RoadNumber(crossNumber), plateNumber));
+    }
+
+    [Theory]
+    [InlineData("av el poblado sur # 30-28 apto 302", "AV EL POBLADO SUR 30 28 AP 302")]
+    [InlineData("Av. Américas # 68-20", "AV AMERICAS 68 20")]
+    public void TryParse_UnknownNamedAvenue_FormatsWithName(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("av # 30-28")]
+    [InlineData("av el poblado")]
+    [InlineData("av el poblado # 30")]
+    [InlineData("calle real # 30-28")]
+    [InlineData("av calle real # 30-28")]
+    public void TryParse_InvalidNamedRoad_ReturnsFalse(string input)
+    {
+        AddressParser.TryParse(input, out _).Should().BeFalse();
+    }
 }

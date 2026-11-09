@@ -117,10 +117,21 @@ public static class AddressParser
             return true;
         }
 
-        if (roadType != RoadType.Avenida
-            || !NamedAvenues.TryGetRoad(ReadName(tokens, ref position), out var namedType, out var namedRoad))
+        if (roadType != RoadType.Avenida)
         {
             return false;
+        }
+
+        var name = ReadName(tokens, ref position);
+        if (name.Length == 0)
+        {
+            return false;
+        }
+
+        if (!NamedAvenues.TryGetRoad(name, out var namedType, out var namedRoad))
+        {
+            road = new RoadNumber(0, Name: name.ToUpperInvariant());
+            return true;
         }
 
         roadType = namedType;

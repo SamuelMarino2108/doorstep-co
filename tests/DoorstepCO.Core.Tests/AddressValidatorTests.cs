@@ -159,4 +159,23 @@ public sealed class AddressValidatorTests
     {
         AddressValidator.Validate("calle 59 # 80").Should().Be(AddressValidator.Validate("calle 59 # 80"));
     }
+
+    [Fact]
+    public void Validate_UnknownNamedAvenue_ReturnsNamedRoadIssue()
+    {
+        var result = AddressValidator.Validate("av el poblado # 30-28");
+
+        result.Normalized.Should().Be("AV EL POBLADO 30 28");
+        result.Confidence.Should().Be(0.8);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.NamedRoad);
+    }
+
+    [Fact]
+    public void Validate_KnownNamedAvenue_ReturnsNoIssues()
+    {
+        var result = AddressValidator.Validate("Av el dorado # 30 28");
+
+        result.Normalized.Should().Be("AC 26 30 28");
+        result.Issues.Should().BeEmpty();
+    }
 }
