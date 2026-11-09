@@ -42,7 +42,7 @@ public static class AddressParser
             return false;
         }
 
-        address = new Address(roadType, roadNumber, crossNumber, plateNumber);
+        address = new Address(roadType, new RoadNumber(roadNumber), new RoadNumber(crossNumber), plateNumber);
         return true;
     }
 

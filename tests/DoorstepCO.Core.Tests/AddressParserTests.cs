@@ -17,7 +17,7 @@ public sealed class AddressParserTests
         var parsed = AddressParser.TryParse(input, out var address);
 
         parsed.Should().BeTrue();
-        address.Should().Be(new Address(roadType, roadNumber, crossNumber, plateNumber));
+        address.Should().Be(new Address(roadType, new RoadNumber(roadNumber), new RoadNumber(crossNumber), plateNumber));
     }
 
     [Theory]

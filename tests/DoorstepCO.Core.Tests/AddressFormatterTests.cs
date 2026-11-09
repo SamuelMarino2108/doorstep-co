@@ -13,7 +13,7 @@ public sealed class AddressFormatterTests
     public void Format_Address_ReturnsStandardForm(
         RoadType roadType, int roadNumber, int crossNumber, int plateNumber, string expected)
     {
-        var address = new Address(roadType, roadNumber, crossNumber, plateNumber);
+        var address = new Address(roadType, new RoadNumber(roadNumber), new RoadNumber(crossNumber), plateNumber);
 
         var formatted = AddressFormatter.Format(address);
 

@@ -20,8 +20,8 @@ public static class AddressFormatter
         return string.Join(
             ' ',
             RoadTypeAbbreviations.For(address.RoadType),
-            address.RoadNumber.ToString(CultureInfo.InvariantCulture),
-            address.CrossNumber.ToString(CultureInfo.InvariantCulture),
+            address.Road.Number.ToString(CultureInfo.InvariantCulture),
+            address.Cross.Number.ToString(CultureInfo.InvariantCulture),
             address.PlateNumber.ToString(CultureInfo.InvariantCulture));
     }
 }
