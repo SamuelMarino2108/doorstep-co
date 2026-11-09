@@ -83,3 +83,7 @@ dotnet_naming_style.camel_case.capitalization = camel_case
 dotnet_naming_rule.locals_and_parameters_camel_case.symbols = locals_and_parameters
 dotnet_naming_rule.locals_and_parameters_camel_case.style = camel_case
 dotnet_naming_rule.locals_and_parameters_camel_case.severity = warning
+
+[tests/**.cs]
+# Test names follow MethodName_Scenario_ExpectedResult
+dotnet_diagnostic.CA1707.severity = none
