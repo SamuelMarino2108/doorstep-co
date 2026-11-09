@@ -1,0 +1,22 @@
+namespace DoorstepCO.Core.Tests;
+
+public sealed class AddressFormatterTests
+{
+    [Theory]
+    [InlineData(RoadType.Calle, 59, 80, 12, "CL 59 80 12")]
+    [InlineData(RoadType.Carrera, 7, 32, 16, "KR 7 32 16")]
+    [InlineData(RoadType.Diagonal, 40, 20, 10, "DG 40 20 10")]
+    [InlineData(RoadType.Transversal, 5, 10, 20, "TV 5 10 20")]
+    [InlineData(RoadType.Avenida, 68, 13, 45, "AV 68 13 45")]
+    [InlineData(RoadType.AvenidaCalle, 26, 50, 1, "AC 26 50 1")]
+    [InlineData(RoadType.AvenidaCarrera, 15, 100, 20, "AK 15 100 20")]
+    public void Format_Address_ReturnsStandardForm(
+        RoadType roadType, int roadNumber, int crossNumber, int plateNumber, string expected)
+    {
+        var address = new Address(roadType, roadNumber, crossNumber, plateNumber);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be(expected);
+    }
+}
