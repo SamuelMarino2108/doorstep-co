@@ -25,6 +25,8 @@ public sealed class BatchFileException : Exception
         BatchError.EmptyFile => "The file is empty.",
         BatchError.MissingAddressColumn => $"The file has no {BatchColumns.AddressHeader} column.",
         BatchError.UnreadableFile => "The file could not be read as a spreadsheet.",
+        BatchError.UnsupportedFileType => "Only .csv and .xlsx files are supported.",
+        BatchError.FileTooLarge => $"The file is larger than {BatchFile.MaxSizeInBytes / (1024 * 1024)} MB.",
         _ => throw new ArgumentOutOfRangeException(nameof(error), error, null),
     };
 }

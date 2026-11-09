@@ -13,4 +13,10 @@ public enum BatchError
 
     /// <summary>The file could not be opened as a spreadsheet.</summary>
     UnreadableFile,
+
+    /// <summary>The file is neither a .csv nor an .xlsx file.</summary>
+    UnsupportedFileType,
+
+    /// <summary>The file is larger than <see cref="BatchFile.MaxSizeInBytes"/>.</summary>
+    FileTooLarge,
 }
