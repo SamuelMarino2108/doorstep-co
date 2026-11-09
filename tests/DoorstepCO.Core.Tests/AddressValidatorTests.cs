@@ -114,6 +114,38 @@ public sealed class AddressValidatorTests
         result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.ZeroNumber);
     }
 
+    [Theory]
+    [InlineData("calle 59 # 80-151")]
+    [InlineData("calle 59 # 80-850")]
+    [InlineData("calle 59 # 80-9999")]
+    public void Validate_PlateNumberAbove150_ReturnsPlateNumberOutOfRangeIssue(string input)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Address.Should().NotBeNull();
+        result.Confidence.Should().Be(0.7);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.PlateNumberOutOfRange);
+    }
+
+    [Theory]
+    [InlineData("calle 59 # 80-1")]
+    [InlineData("calle 59 # 80-150")]
+    [InlineData("calle 200 # 300-99")]
+    public void Validate_PlateNumberUpTo150_ReturnsNoIssues(string input)
+    {
+        AddressValidator.Validate(input).Issues.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Validate_SeveralIssues_AddsUpPenalties()
+    {
+        var result = AddressValidator.Validate("calle 0 # 80-851 frente al parque");
+
+        result.Issues.Select(issue => issue.Code).Should().Equal(
+            IssueCode.UnrecognizedText, IssueCode.ZeroNumber, IssueCode.PlateNumberOutOfRange);
+        result.Confidence.Should().Be(0.0);
+    }
+
     [Fact]
     public void Validate_AnyIssue_HasMessage()
     {

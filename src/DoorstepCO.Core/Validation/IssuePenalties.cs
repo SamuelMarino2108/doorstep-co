@@ -16,6 +16,7 @@ internal static class IssuePenalties
         IssueCode.RuralAddress => 0.8,
         IssueCode.UnrecognizedText => 0.3,
         IssueCode.ZeroNumber => 0.4,
+        IssueCode.PlateNumberOutOfRange => 0.3,
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
 

@@ -47,6 +47,11 @@ public static class AddressValidator
             issues.Add(Issue(IssueCode.ZeroNumber));
         }
 
+        if (address.PlateNumber > AddressLimits.MaxPlateNumber)
+        {
+            issues.Add(Issue(IssueCode.PlateNumberOutOfRange));
+        }
+
         return Result(address, issues);
     }
 

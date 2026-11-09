@@ -24,4 +24,7 @@ public enum IssueCode
 
     /// <summary>The road, the crossing road or the plate number is 0, e.g. "Calle 59 # 80-0".</summary>
     ZeroNumber,
+
+    /// <summary>The plate number is suspiciously high, e.g. "Calle 59 # 80-850".</summary>
+    PlateNumberOutOfRange,
 }

@@ -12,6 +12,7 @@ internal static class IssueMessages
         IssueCode.RuralAddress => "The address looks rural and does not follow the standard urban nomenclature.",
         IssueCode.UnrecognizedText => "Text after the address was not recognized and was ignored.",
         IssueCode.ZeroNumber => "The road, crossing road or plate number is 0.",
+        IssueCode.PlateNumberOutOfRange => $"The plate number is greater than {AddressLimits.MaxPlateNumber}.",
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
 
