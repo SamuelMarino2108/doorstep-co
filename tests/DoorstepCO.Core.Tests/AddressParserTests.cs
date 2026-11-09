@@ -174,6 +174,90 @@ public sealed class AddressParserTests
         AddressFormatter.Format(address!).Should().Be(expected);
     }
 
+    [Fact]
+    public void TryParse_AddressWithoutComplements_ReturnsEmptyComplements()
+    {
+        var parsed = AddressParser.TryParse("calle 59 # 80-12", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void TryParse_TowerAndApartment_ReturnsComplementsInOrder()
+    {
+        var parsed = AddressParser.TryParse("calle 59 a bis sur # 80-12 torre 2 apto 302", out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(
+            RoadType.Calle,
+            new RoadNumber(59, 'A', IsBis: true, Quadrant: Quadrant.Sur),
+            new RoadNumber(80),
+            12)
+        {
+            Complements = [new(ComplementType.Torre, "2"), new(ComplementType.Apartamento, "302")],
+        });
+    }
+
+    [Theory]
+    [InlineData("calle 59 # 80-12 apartamento 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 Apto. 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apt 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 ap 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto 302 b", ComplementType.Apartamento, "302B")]
+    [InlineData("calle 59 # 80-12 apto 302b", ComplementType.Apartamento, "302B")]
+    [InlineData("calle 59 # 80-12 torre a", ComplementType.Torre, "A")]
+    [InlineData("calle 59 # 80-12 to 3", ComplementType.Torre, "3")]
+    [InlineData("calle 59 # 80-12 t 3", ComplementType.Torre, "3")]
+    [InlineData("calle 59 # 80-12 t3", ComplementType.Torre, "3")]
+    [InlineData("calle 59 # 80-12 interior 4", ComplementType.Interior, "4")]
+    [InlineData("calle 59 # 80-12 int. 4", ComplementType.Interior, "4")]
+    [InlineData("calle 59 # 80-12 in 4", ComplementType.Interior, "4")]
+    [InlineData("calle 59 # 80-12 bloque c", ComplementType.Bloque, "C")]
+    [InlineData("calle 59 # 80-12 blq 5", ComplementType.Bloque, "5")]
+    [InlineData("calle 59 # 80-12 bl 5", ComplementType.Bloque, "5")]
+    [InlineData("calle 59 # 80-12 bloque e", ComplementType.Bloque, "E")]
+    [InlineData("calle 59 # 80-12 casa 15", ComplementType.Casa, "15")]
+    [InlineData("calle 59 # 80-12 manzana 3", ComplementType.Manzana, "3")]
+    [InlineData("calle 59 # 80-12 mz 3", ComplementType.Manzana, "3")]
+    [InlineData("calle 59 # 80-12 mz. b", ComplementType.Manzana, "B")]
+    [InlineData("calle 59 # 80-12 lote 7", ComplementType.Lote, "7")]
+    [InlineData("calle 59 # 80-12 lt 7", ComplementType.Lote, "7")]
+    [InlineData("carrera 7 # 10-20 sur apto 101", ComplementType.Apartamento, "101")]
+    [InlineData("calle 59 # 80-12 apto 007", ComplementType.Apartamento, "007")]
+    public void TryParse_SingleComplement_ReturnsTypeAndValue(string input, ComplementType type, string value)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(new Complement(type, value));
+    }
+
+    [Fact]
+    public void TryParse_SeveralComplements_ReturnsAllInOrder()
+    {
+        var parsed = AddressParser.TryParse("kr 7 # 32-16 mz 3 lt 4 casa 2", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Manzana, "3"),
+            new Complement(ComplementType.Lote, "4"),
+            new Complement(ComplementType.Casa, "2"));
+    }
+
+    [Fact]
+    public void TryParse_KeywordLetterAfterValue_StartsNewComplement()
+    {
+        var parsed = AddressParser.TryParse("calle 59 # 80-12 apto 302 t 2", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Apartamento, "302"),
+            new Complement(ComplementType.Torre, "2"));
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("59 # 80-12")]
@@ -198,6 +282,16 @@ public sealed class AddressParserTests
     [InlineData("avenida avenida 26 # 68-35")]
     [InlineData("av diagonal 40 # 20-10")]
     [InlineData("av calle carrera 26 # 68-35")]
+    [InlineData("calle 59 # 80-12 apto")]
+    [InlineData("calle 59 # 80-12 apto torre 2")]
+    [InlineData("calle 59 # 80-12 apto 302 b c")]
+    [InlineData("calle 59 # 80-12 apto 302 302")]
+    [InlineData("calle 59 # 80-12 apto ab")]
+    [InlineData("calle 59 # 80-12 apto 302 sur")]
+    [InlineData("calle 59 # 80-12 apto 302 # 5")]
+    [InlineData("calle 59 # 80-12 ca 15")]
+    [InlineData("calle 59 # 80-12 cs 15")]
+    [InlineData("mz 3 lt 4")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
         var parsed = AddressParser.TryParse(input, out var address);

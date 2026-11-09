@@ -48,7 +48,7 @@ public static class AddressParser
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
 
-        if (position != tokens.Count
+        if (!ComplementReader.TryReadAll(tokens, position, out var complements)
             || !QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
         {
             return false;
@@ -58,7 +58,10 @@ public static class AddressParser
             roadType,
             road with { Quadrant = roadQuadrant },
             cross with { Quadrant = crossQuadrant },
-            plateNumber);
+            plateNumber)
+        {
+            Complements = complements,
+        };
         return true;
     }
 
