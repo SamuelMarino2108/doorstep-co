@@ -18,7 +18,25 @@ public static class AddressParser
     /// <returns><see langword="true"/> when the input was parsed; otherwise <see langword="false"/>.</returns>
     public static bool TryParse(string input, [NotNullWhen(true)] out Address? address)
     {
+        if (TryParse(input, out var parsed, out var unrecognizedText) && unrecognizedText.Length == 0)
+        {
+            address = parsed;
+            return true;
+        }
+
         address = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Like <see cref="TryParse(string, out Address?)"/>, but tolerates unrecognized text after the address: it
+    /// returns the recognized part and the normalized tokens that were left over, separated by spaces.
+    /// </summary>
+    internal static bool TryParse(
+        string input, [NotNullWhen(true)] out Address? address, out string unrecognizedText)
+    {
+        address = null;
+        unrecognizedText = string.Empty;
         var tokens = AddressTokenizer.Tokenize(input);
         var position = 0;
 
@@ -48,12 +66,14 @@ public static class AddressParser
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
 
-        if (!ComplementReader.TryReadAll(tokens, position, out var complements)
-            || !QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
+        var stop = ComplementReader.ReadValid(tokens, position, out var complements);
+
+        if (!QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
         {
             return false;
         }
 
+        unrecognizedText = string.Join(' ', tokens.Skip(stop));
         address = new Address(
             roadType,
             road with { Quadrant = roadQuadrant },

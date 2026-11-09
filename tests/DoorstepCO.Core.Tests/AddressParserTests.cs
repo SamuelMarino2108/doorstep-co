@@ -346,4 +346,51 @@ public sealed class AddressParserTests
         parsed.Should().BeFalse();
         address.Should().BeNull();
     }
+
+    [Theory]
+    [InlineData("calle 59 # 80-12")]
+    [InlineData("calle 59 # 80-12 apto 302")]
+    [InlineData("calle 59 # 80-12 conjunto los pinos torre 2")]
+    public void TryParseWithUnrecognized_FullyRecognizedAddress_ReturnsEmptyUnrecognizedText(string input)
+    {
+        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        address.Should().NotBeNull();
+        unrecognizedText.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData("calle 59 # 80-12 apto 302 frente al parque", "CL 59 80 12 AP 302", "frente al parque")]
+    [InlineData("calle 59 # 80-12 frente al parque", "CL 59 80 12", "frente al parque")]
+    [InlineData("calle 59 # 80-12 apto", "CL 59 80 12", "apto")]
+    [InlineData("calle 59 # 80-12 torre 2 apto", "CL 59 80 12 TO 2", "apto")]
+    [InlineData("calle 59 # 80-12 apto 302 b c", "CL 59 80 12 AP 302B", "c")]
+    [InlineData("calle 59 # 80-12 bis", "CL 59 80 12", "bis")]
+    [InlineData("calle 59 # 80-12 apto 302 # 5", "CL 59 80 12 AP 302", "# 5")]
+    [InlineData("kr 7 este # 32-16 Edificio Azul", "CRA 7 ESTE 32 16", "edificio azul")]
+    public void TryParseWithUnrecognized_TrailingText_ReturnsRecognizedPartAndText(
+        string input, string expected, string expectedUnrecognized)
+    {
+        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+        unrecognizedText.Should().Be(expectedUnrecognized);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("calle 59 # 80 frente al parque")]
+    [InlineData("calle 59 frente # 80-12")]
+    [InlineData("frente calle 59 # 80-12")]
+    [InlineData("av 68 sur este # 13-45")]
+    public void TryParseWithUnrecognized_IncompleteAddress_ReturnsFalse(string input)
+    {
+        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+
+        parsed.Should().BeFalse();
+        address.Should().BeNull();
+        unrecognizedText.Should().BeEmpty();
+    }
 }
