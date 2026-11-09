@@ -3,7 +3,8 @@ namespace DoorstepCO.Core.Parsing;
 /// <summary>
 /// Decides which road each written quadrant belongs to: "Sur" always qualifies the calle and "Este" always
 /// qualifies the carrera, wherever it was written. When the road type does not tell (plain avenida), the
-/// quadrant stays where it was written.
+/// quadrant stays where it was written. Repeating a quadrant is allowed; two different quadrants on the
+/// same road are not.
 /// </summary>
 internal static class QuadrantAssignment
 {
@@ -20,7 +21,7 @@ internal static class QuadrantAssignment
         {
             if (BelongsToRoad(quadrant, roadType, writtenOnRoad))
             {
-                if (roadQuadrant is not null)
+                if (roadQuadrant is { } existing && existing != quadrant)
                 {
                     return false;
                 }
@@ -29,7 +30,7 @@ internal static class QuadrantAssignment
             }
             else
             {
-                if (crossQuadrant is not null)
+                if (crossQuadrant is { } existing && existing != quadrant)
                 {
                     return false;
                 }

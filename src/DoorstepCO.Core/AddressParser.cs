@@ -30,7 +30,7 @@ public static class AddressParser
             return false;
         }
 
-        ReadQuadrant(tokens, ref position, writtenOnRoad: true, quadrants);
+        ReadQuadrants(tokens, ref position, writtenOnRoad: true, quadrants);
         SkipIf(tokens, ref position, PlateSeparatorKeywords.IsPlateSeparator);
 
         if (!TryReadRoadNumber(tokens, ref position, out var cross))
@@ -38,7 +38,7 @@ public static class AddressParser
             return false;
         }
 
-        ReadQuadrant(tokens, ref position, writtenOnRoad: false, quadrants);
+        ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
         SkipIf(tokens, ref position, token => token == AddressTokenizer.Dash);
 
         if (!TryReadNumber(tokens, ref position, out var plateNumber))
@@ -46,7 +46,7 @@ public static class AddressParser
             return false;
         }
 
-        ReadQuadrant(tokens, ref position, writtenOnRoad: false, quadrants);
+        ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
 
         if (position != tokens.Count
             || !QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
@@ -104,13 +104,13 @@ public static class AddressParser
         return true;
     }
 
-    private static void ReadQuadrant(
+    private static void ReadQuadrants(
         IReadOnlyList<string> tokens,
         ref int position,
         bool writtenOnRoad,
         List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants)
     {
-        if (position < tokens.Count && QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+        while (position < tokens.Count && QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
         {
             quadrants.Add((quadrant, writtenOnRoad));
             position++;

@@ -141,6 +141,11 @@ public sealed class AddressParserTests
     [InlineData("kr 5 e # 10-20 s", "KR 5 ESTE 10 20 SUR")]
     [InlineData("av 68 sur # 13-45", "AV 68 SUR 13 45")]
     [InlineData("av 68 # 13-45 sur", "AV 68 13 45 SUR")]
+    [InlineData("calle 26 sur # 50-10 sur", "CL 26 SUR 50 10")]
+    [InlineData("calle 26 sur sur # 50-10", "CL 26 SUR 50 10")]
+    [InlineData("calle 26 # 50 sur - 10 sur", "CL 26 SUR 50 10")]
+    [InlineData("kr 7 sur # 10-20 sur", "KR 7 10 20 SUR")]
+    [InlineData("kr 5 este # 10 sur - 20 este sur", "KR 5 ESTE 10 20 SUR")]
     public void TryParse_QuadrantVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -185,9 +190,6 @@ public sealed class AddressParserTests
     [InlineData("calle 59 bis a b # 80-12")]
     [InlineData("calle 59 # 80-12 bis")]
     [InlineData("calle sur # 50-10")]
-    [InlineData("calle 26 sur sur # 50-10")]
-    [InlineData("calle 26 sur # 50-10 sur")]
-    [InlineData("calle 26 # 50 sur - 10 sur")]
     [InlineData("av 68 sur este # 13-45")]
     [InlineData("calle carrera 26 # 68-35")]
     [InlineData("avenida avenida 26 # 68-35")]
