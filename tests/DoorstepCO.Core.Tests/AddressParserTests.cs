@@ -247,6 +247,32 @@ public sealed class AddressParserTests
             new Complement(ComplementType.Casa, "2"));
     }
 
+    [Theory]
+    [InlineData("calle 59 # 80-12 conjunto los pinos", ComplementType.Conjunto, "LOS PINOS")]
+    [InlineData("calle 59 # 80-12 conj. Los Pinos", ComplementType.Conjunto, "LOS PINOS")]
+    [InlineData("calle 59 # 80-12 cj villa del río 2", ComplementType.Conjunto, "VILLA DEL RIO 2")]
+    [InlineData("calle 59 # 80-12 conjunto residencial los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
+    [InlineData("calle 59 # 80-12 conj. res. los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
+    public void TryParse_ConjuntoName_ReturnsNameAsValue(string input, ComplementType type, string value)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(new Complement(type, value));
+    }
+
+    [Fact]
+    public void TryParse_ConjuntoFollowedByComplements_EndsNameAtNextKeyword()
+    {
+        var parsed = AddressParser.TryParse("kr 7 # 32-16 conjunto los pinos torre 2 apto 302", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Conjunto, "LOS PINOS"),
+            new Complement(ComplementType.Torre, "2"),
+            new Complement(ComplementType.Apartamento, "302"));
+    }
+
     [Fact]
     public void TryParse_KeywordLetterAfterValue_StartsNewComplement()
     {
@@ -291,6 +317,10 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 apto 302 # 5")]
     [InlineData("calle 59 # 80-12 ca 15")]
     [InlineData("calle 59 # 80-12 cs 15")]
+    [InlineData("calle 59 # 80-12 conjunto")]
+    [InlineData("calle 59 # 80-12 conjunto residencial")]
+    [InlineData("calle 59 # 80-12 conjunto apto 302")]
+    [InlineData("calle 59 # 80-12 conjunto los-pinos")]
     [InlineData("mz 3 lt 4")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
