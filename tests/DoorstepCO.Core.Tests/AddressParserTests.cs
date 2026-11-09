@@ -285,6 +285,23 @@ public sealed class AddressParserTests
     }
 
     [Theory]
+    [InlineData("cll 59 a bis sur # 80-12 apto 302", "CL 59A BIS SUR 80 12 AP 302")]
+    [InlineData("Calle 59 # 80-12 Torre 2 Apto. 302", "CL 59 80 12 TO 2 AP 302")]
+    [InlineData("kr 7 # 32-16 t3 ap302b", "KR 7 32 16 TO 3 AP 302B")]
+    [InlineData("carrera 7 # 10-20 sur int 4", "KR 7 10 20 SUR IN 4")]
+    [InlineData("dg 40 # 20-10 mz b lt 12 casa 3", "DG 40 20 10 MZ B LT 12 CA 3")]
+    [InlineData("cl 26 # 50-10 bloque 5 apto 201", "CL 26 50 10 BL 5 AP 201")]
+    [InlineData("kr 7 # 32-16 Conjunto Residencial Los Pinos torre a apto 101", "KR 7 32 16 CON LOS PINOS TO A AP 101")]
+    [InlineData("kr 7 # 32-16 conj el bosque", "KR 7 32 16 CONJ EL BOSQUE")]
+    public void TryParse_ComplementVariants_FormatsToStandardForm(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("59 # 80-12")]
     [InlineData("calle # 80-12")]
