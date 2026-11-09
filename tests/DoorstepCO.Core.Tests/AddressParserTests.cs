@@ -393,4 +393,21 @@ public sealed class AddressParserTests
         address.Should().BeNull();
         unrecognizedText.Should().BeEmpty();
     }
+
+    [Theory]
+    [InlineData("Av el dorado # 30 28", "AC 26 30 28")]
+    [InlineData("Avenida El Dorado No. 68B-31", "AC 26 68B 31")]
+    [InlineData("av. jorge eliécer gaitán # 30-28 apto 302", "AC 26 30 28 AP 302")]
+    [InlineData("Av. Caracas # 45-20", "AK 14 45 20")]
+    [InlineData("av boyaca # 30-20 sur", "AK 72 30 20 SUR")]
+    [InlineData("Av. NQS # 10-15", "AK 30 10 15")]
+    [InlineData("Av. Primero de Mayo # 10-20", "AC 22 SUR 10 20")]
+    [InlineData("avenida chile 15 20", "AC 72 15 20")]
+    public void TryParse_KnownNamedAvenue_FormatsWithStandardNumber(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
 }
