@@ -89,6 +89,8 @@ Do not add new projects or top-level folders without asking first.
 - One logical change per commit. No "WIP", "misc" or "updates" commits.
 - Subject line under 72 characters; add a body only when the "why" is not obvious.
 - Do not mix formatting changes with logic changes in the same commit.
+- The repository owner is the sole author of every commit. Never add `Co-Authored-By` trailers or any
+  other AI attribution (e.g. "Generated with Claude Code") to commit messages or pull request descriptions.
 
 ## Safety
 
