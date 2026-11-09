@@ -48,11 +48,13 @@ public sealed class AddressParserTests
     [InlineData("Diagonal 40 nro 20-10", "DG 40 20 10")]
     [InlineData("diag. 40 # 20-10", "DG 40 20 10")]
     [InlineData("DG 40 # 20-10", "DG 40 20 10")]
+    [InlineData("dgn 40 # 20-10", "DG 40 20 10")]
     [InlineData("TRANSVERSAL 5 #10 - 20", "TV 5 10 20")]
     [InlineData("transv 5 # 10-20", "TV 5 10 20")]
     [InlineData("tr. 5 # 10-20", "TV 5 10 20")]
     [InlineData("Avenida 68 # 13-45", "AV 68 13 45")]
     [InlineData("Avda. 68 # 13-45", "AV 68 13 45")]
+    [InlineData("Ave 68 # 13-45", "AV 68 13 45")]
     [InlineData("AC 26 # 50-01", "AC 26 50 1")]
     [InlineData("ak 15 # 100-20", "AK 15 100 20")]
     public void TryParse_KeywordAndSeparatorVariants_FormatsToStandardForm(string input, string expected)
@@ -161,6 +163,7 @@ public sealed class AddressParserTests
     [InlineData("avda cl 26 sur # 68-35", "AC 26 SUR 68 35")]
     [InlineData("Avenida Carrera 15 # 100-20", "AK 15 100 20")]
     [InlineData("av cra 15 # 100-20", "AK 15 100 20")]
+    [InlineData("ave calle 26 # 68-35", "AC 26 68 35")]
     [InlineData("Av. Kr 68 # 13-45", "AK 68 13 45")]
     [InlineData("av carrera 30 # 1-30 sur", "AK 30 1 30 SUR")]
     public void TryParse_CompoundAvenueVariants_FormatsToStandardForm(string input, string expected)

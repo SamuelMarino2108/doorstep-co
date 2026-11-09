@@ -13,10 +13,12 @@ public sealed class RoadTypeKeywordsTests
     [InlineData("kr", RoadType.Carrera)]
     [InlineData("diagonal", RoadType.Diagonal)]
     [InlineData("dg", RoadType.Diagonal)]
+    [InlineData("dgn", RoadType.Diagonal)]
     [InlineData("transversal", RoadType.Transversal)]
     [InlineData("tv", RoadType.Transversal)]
     [InlineData("avenida", RoadType.Avenida)]
     [InlineData("av", RoadType.Avenida)]
+    [InlineData("ave", RoadType.Avenida)]
     [InlineData("ac", RoadType.AvenidaCalle)]
     [InlineData("ak", RoadType.AvenidaCarrera)]
     public void TryGetRoadType_KnownKeyword_ReturnsRoadType(string keyword, RoadType expected)

@@ -23,6 +23,7 @@ internal static class RoadTypeKeywords
         ["diagonal"] = RoadType.Diagonal,
         ["diag"] = RoadType.Diagonal,
         ["dg"] = RoadType.Diagonal,
+        ["dgn"] = RoadType.Diagonal,
 
         ["transversal"] = RoadType.Transversal,
         ["transv"] = RoadType.Transversal,
@@ -33,6 +34,7 @@ internal static class RoadTypeKeywords
         ["avenida"] = RoadType.Avenida,
         ["avda"] = RoadType.Avenida,
         ["av"] = RoadType.Avenida,
+        ["ave"] = RoadType.Avenida,
 
         ["ac"] = RoadType.AvenidaCalle,
         ["ak"] = RoadType.AvenidaCarrera,
