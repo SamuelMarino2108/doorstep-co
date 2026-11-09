@@ -10,4 +10,8 @@
     <PackageTags>colombia;address;parser;normalization;logistics</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="DoorstepCO.Core.Tests" />
+  </ItemGroup>
+
 </Project>
