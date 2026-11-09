@@ -12,6 +12,11 @@ public enum IssueCode
     Unparseable,
 
     /// <summary>
+    /// The address mentions rural places (vereda, finca, km, ...) and does not follow the urban nomenclature.
+    /// </summary>
+    RuralAddress,
+
+    /// <summary>
     /// Text after the address was not recognized and was ignored, e.g. "frente al parque" in
     /// "Calle 59 # 80-12 frente al parque".
     /// </summary>

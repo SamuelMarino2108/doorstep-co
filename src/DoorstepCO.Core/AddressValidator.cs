@@ -1,3 +1,5 @@
+using DoorstepCO.Core.Normalization;
+using DoorstepCO.Core.Parsing;
 using DoorstepCO.Core.Validation;
 
 namespace DoorstepCO.Core;
@@ -22,12 +24,18 @@ public static class AddressValidator
             return Result(null, [Issue(IssueCode.Empty)]);
         }
 
-        if (!AddressParser.TryParse(input, out var address, out var unrecognizedText))
+        var issues = new List<AddressIssue>();
+        if (AddressTokenizer.Tokenize(input).Any(RuralKeywords.IsRural))
         {
-            return Result(null, [Issue(IssueCode.Unparseable)]);
+            issues.Add(Issue(IssueCode.RuralAddress));
         }
 
-        var issues = new List<AddressIssue>();
+        if (!AddressParser.TryParse(input, out var address, out var unrecognizedText))
+        {
+            issues.Add(Issue(IssueCode.Unparseable));
+            return Result(null, issues);
+        }
+
         if (unrecognizedText.Length > 0)
         {
             issues.Add(new AddressIssue(

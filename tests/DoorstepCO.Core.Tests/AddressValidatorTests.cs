@@ -75,6 +75,30 @@ public sealed class AddressValidatorTests
         result.Issues.Single().Message.Should().Contain("\"frente al parque\"");
     }
 
+    [Theory]
+    [InlineData("km 5 via la calera vereda el salitre")]
+    [InlineData("Vereda El Rosal, Finca La Esperanza")]
+    [InlineData("Kilómetro 12 vía a Girardot")]
+    [InlineData("Corregimiento Santa Elena, hacienda los alpes")]
+    public void Validate_UnparseableRuralAddress_ReturnsRuralAndUnparseableIssues(string input)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Address.Should().BeNull();
+        result.Confidence.Should().Be(0.0);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.RuralAddress, IssueCode.Unparseable);
+    }
+
+    [Fact]
+    public void Validate_ParseableAddressWithRuralKeyword_FlagsRuralAddress()
+    {
+        var result = AddressValidator.Validate("calle 5 # 3-20 vereda el salitre");
+
+        result.Normalized.Should().Be("CL 5 3 20");
+        result.Confidence.Should().Be(0.0);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.RuralAddress, IssueCode.UnrecognizedText);
+    }
+
     [Fact]
     public void Validate_AnyIssue_HasMessage()
     {
