@@ -27,7 +27,7 @@ src/
     Parsing/         tokenizer and parser
     Normalization/   abbreviations, synonyms, common typos
     Validation/      issue detection and confidence scoring
-    Formatting/      standard output (DIAN-style abbreviations: CL, KR, DG, TV, AC, AK, AV)
+    Formatting/      standard output (DIAN-style abbreviations: CL, CRA, DG, TV, AC, AK, AV)
   DoorstepCO.Api/
 tests/
   DoorstepCO.Core.Tests/

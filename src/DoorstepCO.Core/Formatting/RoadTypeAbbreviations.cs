@@ -8,7 +8,7 @@ internal static class RoadTypeAbbreviations
     public static string For(RoadType roadType) => roadType switch
     {
         RoadType.Calle => "CL",
-        RoadType.Carrera => "KR",
+        RoadType.Carrera => "CRA",
         RoadType.Diagonal => "DG",
         RoadType.Transversal => "TV",
         RoadType.Avenida => "AV",

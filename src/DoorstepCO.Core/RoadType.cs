@@ -8,7 +8,7 @@ public enum RoadType
     /// <summary>Calle (CL).</summary>
     Calle,
 
-    /// <summary>Carrera (KR).</summary>
+    /// <summary>Carrera (CRA).</summary>
     Carrera,
 
     /// <summary>Diagonal (DG).</summary>

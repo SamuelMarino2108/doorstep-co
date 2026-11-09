@@ -39,12 +39,12 @@ public sealed class AddressParserTests
     [InlineData("Cálle 59 Nº 80-12", "CL 59 80 12")]
     [InlineData("  calle   59   #   80  -  12  ", "CL 59 80 12")]
     [InlineData("calle59#80-12", "CL 59 80 12")]
-    [InlineData("Cra. 7 No. 32-16", "KR 7 32 16")]
-    [InlineData("Carrera 7 numero 32-16", "KR 7 32 16")]
-    [InlineData("KRA 7 Nro. 32-16", "KR 7 32 16")]
-    [InlineData("kr 7 n 32 16", "KR 7 32 16")]
-    [InlineData("cr 7 num 32-16", "KR 7 32 16")]
-    [InlineData("carr. 7 # 32-16", "KR 7 32 16")]
+    [InlineData("Cra. 7 No. 32-16", "CRA 7 32 16")]
+    [InlineData("Carrera 7 numero 32-16", "CRA 7 32 16")]
+    [InlineData("KRA 7 Nro. 32-16", "CRA 7 32 16")]
+    [InlineData("kr 7 n 32 16", "CRA 7 32 16")]
+    [InlineData("cr 7 num 32-16", "CRA 7 32 16")]
+    [InlineData("carr. 7 # 32-16", "CRA 7 32 16")]
     [InlineData("Diagonal 40 nro 20-10", "DG 40 20 10")]
     [InlineData("diag. 40 # 20-10", "DG 40 20 10")]
     [InlineData("DG 40 # 20-10", "DG 40 20 10")]
@@ -69,9 +69,9 @@ public sealed class AddressParserTests
     [InlineData("calle 59a # 80-12", "CL 59A 80 12")]
     [InlineData("Calle 59 A # 80-12", "CL 59A 80 12")]
     [InlineData("calle 59A #80B-12", "CL 59A 80B 12")]
-    [InlineData("kr 7 # 32 c - 16", "KR 7 32C 16")]
+    [InlineData("kr 7 # 32 c - 16", "CRA 7 32C 16")]
     [InlineData("cl 26 b 32 10", "CL 26B 32 10")]
-    [InlineData("kr 7 n 32 16", "KR 7 32 16")]
+    [InlineData("kr 7 n 32 16", "CRA 7 32 16")]
     public void TryParse_LetterVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -99,8 +99,8 @@ public sealed class AddressParserTests
     [InlineData("Calle 59 A Bis # 80-12", "CL 59A BIS 80 12")]
     [InlineData("calle 59 bis c # 80-12", "CL 59 BIS C 80 12")]
     [InlineData("CL 59A BIS B # 80-12", "CL 59A BIS B 80 12")]
-    [InlineData("kr 7 # 32 bis - 16", "KR 7 32 BIS 16")]
-    [InlineData("kr 7 # 32 a bis a - 16", "KR 7 32A BIS A 16")]
+    [InlineData("kr 7 # 32 bis - 16", "CRA 7 32 BIS 16")]
+    [InlineData("kr 7 # 32 a bis a - 16", "CRA 7 32A BIS A 16")]
     public void TryParse_BisVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -130,24 +130,24 @@ public sealed class AddressParserTests
     [InlineData("calle 59 a bis b sur # 80-12", "CL 59A BIS B SUR 80 12")]
     [InlineData("dg 40 s # 20-10", "DG 40 SUR 20 10")]
     [InlineData("ac 26 s # 50-10", "AC 26 SUR 50 10")]
-    [InlineData("carrera 7 # 10-20 sur", "KR 7 10 20 SUR")]
-    [InlineData("kr 7 # 10 sur - 20", "KR 7 10 20 SUR")]
-    [InlineData("kr 7 sur # 10-20", "KR 7 10 20 SUR")]
+    [InlineData("carrera 7 # 10-20 sur", "CRA 7 10 20 SUR")]
+    [InlineData("kr 7 # 10 sur - 20", "CRA 7 10 20 SUR")]
+    [InlineData("kr 7 sur # 10-20", "CRA 7 10 20 SUR")]
     [InlineData("tv 5 # 10-20 sur", "TV 5 10 20 SUR")]
-    [InlineData("carrera 5 este # 10-20", "KR 5 ESTE 10 20")]
-    [InlineData("kr 5 # 10-20 este", "KR 5 ESTE 10 20")]
+    [InlineData("carrera 5 este # 10-20", "CRA 5 ESTE 10 20")]
+    [InlineData("kr 5 # 10-20 este", "CRA 5 ESTE 10 20")]
     [InlineData("ak 15 # 100-20 este", "AK 15 ESTE 100 20")]
     [InlineData("calle 10 # 5-20 este", "CL 10 5 20 ESTE")]
     [InlineData("calle 10 este # 5-20", "CL 10 5 20 ESTE")]
     [InlineData("calle 10 sur # 5-20 este", "CL 10 SUR 5 20 ESTE")]
-    [InlineData("kr 5 e # 10-20 s", "KR 5 ESTE 10 20 SUR")]
+    [InlineData("kr 5 e # 10-20 s", "CRA 5 ESTE 10 20 SUR")]
     [InlineData("av 68 sur # 13-45", "AV 68 SUR 13 45")]
     [InlineData("av 68 # 13-45 sur", "AV 68 13 45 SUR")]
     [InlineData("calle 26 sur # 50-10 sur", "CL 26 SUR 50 10")]
     [InlineData("calle 26 sur sur # 50-10", "CL 26 SUR 50 10")]
     [InlineData("calle 26 # 50 sur - 10 sur", "CL 26 SUR 50 10")]
-    [InlineData("kr 7 sur # 10-20 sur", "KR 7 10 20 SUR")]
-    [InlineData("kr 5 este # 10 sur - 20 este sur", "KR 5 ESTE 10 20 SUR")]
+    [InlineData("kr 7 sur # 10-20 sur", "CRA 7 10 20 SUR")]
+    [InlineData("kr 5 este # 10 sur - 20 este sur", "CRA 5 ESTE 10 20 SUR")]
     public void TryParse_QuadrantVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -167,6 +167,133 @@ public sealed class AddressParserTests
     [InlineData("Av. Kr 68 # 13-45", "AK 68 13 45")]
     [InlineData("av carrera 30 # 1-30 sur", "AK 30 1 30 SUR")]
     public void TryParse_CompoundAvenueVariants_FormatsToStandardForm(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Fact]
+    public void TryParse_AddressWithoutComplements_ReturnsEmptyComplements()
+    {
+        var parsed = AddressParser.TryParse("calle 59 # 80-12", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void TryParse_TowerAndApartment_ReturnsComplementsInOrder()
+    {
+        var parsed = AddressParser.TryParse("calle 59 a bis sur # 80-12 torre 2 apto 302", out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(
+            RoadType.Calle,
+            new RoadNumber(59, 'A', IsBis: true, Quadrant: Quadrant.Sur),
+            new RoadNumber(80),
+            12)
+        {
+            Complements = [new(ComplementType.Torre, "2"), new(ComplementType.Apartamento, "302")],
+        });
+    }
+
+    [Theory]
+    [InlineData("calle 59 # 80-12 apartamento 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 Apto. 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apt 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 ap 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto 302 b", ComplementType.Apartamento, "302B")]
+    [InlineData("calle 59 # 80-12 apto 302b", ComplementType.Apartamento, "302B")]
+    [InlineData("calle 59 # 80-12 torre a", ComplementType.Torre, "A")]
+    [InlineData("calle 59 # 80-12 to 3", ComplementType.Torre, "3")]
+    [InlineData("calle 59 # 80-12 t 3", ComplementType.Torre, "3")]
+    [InlineData("calle 59 # 80-12 t3", ComplementType.Torre, "3")]
+    [InlineData("calle 59 # 80-12 interior 4", ComplementType.Interior, "4")]
+    [InlineData("calle 59 # 80-12 int. 4", ComplementType.Interior, "4")]
+    [InlineData("calle 59 # 80-12 in 4", ComplementType.Interior, "4")]
+    [InlineData("calle 59 # 80-12 bloque c", ComplementType.Bloque, "C")]
+    [InlineData("calle 59 # 80-12 blq 5", ComplementType.Bloque, "5")]
+    [InlineData("calle 59 # 80-12 bl 5", ComplementType.Bloque, "5")]
+    [InlineData("calle 59 # 80-12 bloque e", ComplementType.Bloque, "E")]
+    [InlineData("calle 59 # 80-12 casa 15", ComplementType.Casa, "15")]
+    [InlineData("calle 59 # 80-12 manzana 3", ComplementType.Manzana, "3")]
+    [InlineData("calle 59 # 80-12 mz 3", ComplementType.Manzana, "3")]
+    [InlineData("calle 59 # 80-12 mz. b", ComplementType.Manzana, "B")]
+    [InlineData("calle 59 # 80-12 lote 7", ComplementType.Lote, "7")]
+    [InlineData("calle 59 # 80-12 lt 7", ComplementType.Lote, "7")]
+    [InlineData("carrera 7 # 10-20 sur apto 101", ComplementType.Apartamento, "101")]
+    [InlineData("calle 59 # 80-12 apto 007", ComplementType.Apartamento, "007")]
+    public void TryParse_SingleComplement_ReturnsTypeAndValue(string input, ComplementType type, string value)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(new Complement(type, value));
+    }
+
+    [Fact]
+    public void TryParse_SeveralComplements_ReturnsAllInOrder()
+    {
+        var parsed = AddressParser.TryParse("kr 7 # 32-16 mz 3 lt 4 casa 2", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Manzana, "3"),
+            new Complement(ComplementType.Lote, "4"),
+            new Complement(ComplementType.Casa, "2"));
+    }
+
+    [Theory]
+    [InlineData("calle 59 # 80-12 conjunto los pinos", ComplementType.Conjunto, "LOS PINOS")]
+    [InlineData("calle 59 # 80-12 conj. Los Pinos", ComplementType.Conjunto, "LOS PINOS")]
+    [InlineData("calle 59 # 80-12 cj villa del río 2", ComplementType.Conjunto, "VILLA DEL RIO 2")]
+    [InlineData("calle 59 # 80-12 conjunto residencial los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
+    [InlineData("calle 59 # 80-12 conj. res. los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
+    public void TryParse_ConjuntoName_ReturnsNameAsValue(string input, ComplementType type, string value)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(new Complement(type, value));
+    }
+
+    [Fact]
+    public void TryParse_ConjuntoFollowedByComplements_EndsNameAtNextKeyword()
+    {
+        var parsed = AddressParser.TryParse("kr 7 # 32-16 conjunto los pinos torre 2 apto 302", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Conjunto, "LOS PINOS"),
+            new Complement(ComplementType.Torre, "2"),
+            new Complement(ComplementType.Apartamento, "302"));
+    }
+
+    [Fact]
+    public void TryParse_KeywordLetterAfterValue_StartsNewComplement()
+    {
+        var parsed = AddressParser.TryParse("calle 59 # 80-12 apto 302 t 2", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Apartamento, "302"),
+            new Complement(ComplementType.Torre, "2"));
+    }
+
+    [Theory]
+    [InlineData("cll 59 a bis sur # 80-12 apto 302", "CL 59A BIS SUR 80 12 AP 302")]
+    [InlineData("Calle 59 # 80-12 Torre 2 Apto. 302", "CL 59 80 12 TO 2 AP 302")]
+    [InlineData("kr 7 # 32-16 t3 ap302b", "CRA 7 32 16 TO 3 AP 302B")]
+    [InlineData("carrera 7 # 10-20 sur int 4", "CRA 7 10 20 SUR IN 4")]
+    [InlineData("dg 40 # 20-10 mz b lt 12 casa 3", "DG 40 20 10 MZ B LT 12 CA 3")]
+    [InlineData("cl 26 # 50-10 bloque 5 apto 201", "CL 26 50 10 BL 5 AP 201")]
+    [InlineData("kr 7 # 32-16 Conjunto Residencial Los Pinos torre a apto 101", "CRA 7 32 16 CON LOS PINOS TO A AP 101")]
+    [InlineData("kr 7 # 32-16 conj el bosque", "CRA 7 32 16 CONJ EL BOSQUE")]
+    public void TryParse_ComplementVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
 
@@ -198,6 +325,20 @@ public sealed class AddressParserTests
     [InlineData("avenida avenida 26 # 68-35")]
     [InlineData("av diagonal 40 # 20-10")]
     [InlineData("av calle carrera 26 # 68-35")]
+    [InlineData("calle 59 # 80-12 apto")]
+    [InlineData("calle 59 # 80-12 apto torre 2")]
+    [InlineData("calle 59 # 80-12 apto 302 b c")]
+    [InlineData("calle 59 # 80-12 apto 302 302")]
+    [InlineData("calle 59 # 80-12 apto ab")]
+    [InlineData("calle 59 # 80-12 apto 302 sur")]
+    [InlineData("calle 59 # 80-12 apto 302 # 5")]
+    [InlineData("calle 59 # 80-12 ca 15")]
+    [InlineData("calle 59 # 80-12 cs 15")]
+    [InlineData("calle 59 # 80-12 conjunto")]
+    [InlineData("calle 59 # 80-12 conjunto residencial")]
+    [InlineData("calle 59 # 80-12 conjunto apto 302")]
+    [InlineData("calle 59 # 80-12 conjunto los-pinos")]
+    [InlineData("mz 3 lt 4")]
     public void TryParse_InvalidAddress_ReturnsFalse(string input)
     {
         var parsed = AddressParser.TryParse(input, out var address);
