@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>DoorstepCO.Core</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>DoorstepCO.Core</PackageId>
+    <Description>Parses, normalizes and validates free-text Colombian addresses.</Description>
+    <Authors>Samuel Marino</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>colombia;address;parser;normalization;logistics</PackageTags>
+  </PropertyGroup>
+
+</Project>
