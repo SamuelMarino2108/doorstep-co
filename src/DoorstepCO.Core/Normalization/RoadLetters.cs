@@ -1,23 +1,28 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace DoorstepCO.Core.Normalization;
 
 /// <summary>
-/// Single-letter suffixes of a road number, e.g. "a" in "calle 59 a". Letters that are reserved for other
-/// keywords ("n" for "numero", "s" and "e" for quadrants) are never road letters.
+/// One- or two-letter suffixes of a road number, e.g. "a" in "calle 59 a" or "ae" in "calle 44ae" (Medellín).
+/// Tokens that are reserved for other keywords ("n" or "no" for "numero", "s" and "e" for quadrants) are never
+/// road letters.
 /// </summary>
 internal static class RoadLetters
 {
-    public static bool TryGetLetter(string token, out char letter)
+    private const int MaxLetters = 2;
+
+    public static bool TryGetLetter(string token, [NotNullWhen(true)] out string? letter)
     {
-        letter = default;
-        if (token.Length != 1
-            || !char.IsAsciiLetterLower(token[0])
+        letter = null;
+        if (token.Length is 0 or > MaxLetters
+            || !token.All(char.IsAsciiLetterLower)
             || PlateSeparatorKeywords.IsPlateSeparator(token)
             || QuadrantKeywords.TryGetQuadrant(token, out _))
         {
             return false;
         }
 
-        letter = char.ToUpperInvariant(token[0]);
+        letter = token.ToUpperInvariant();
         return true;
     }
 }

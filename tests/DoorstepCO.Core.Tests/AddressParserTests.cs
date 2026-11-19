@@ -27,7 +27,7 @@ public sealed class AddressParserTests
         var parsed = AddressParser.TryParse("calle 59a # 80 b - 12", out var address);
 
         parsed.Should().BeTrue();
-        address.Should().Be(new Address(RoadType.Calle, new RoadNumber(59, 'A'), new RoadNumber(80, 'B'), 12));
+        address.Should().Be(new Address(RoadType.Calle, new RoadNumber(59, "A"), new RoadNumber(80, "B"), 12));
     }
 
     [Theory]
@@ -72,6 +72,11 @@ public sealed class AddressParserTests
     [InlineData("kr 7 # 32 c - 16", "CRA 7 32C 16")]
     [InlineData("cl 26 b 32 10", "CL 26B 32 10")]
     [InlineData("kr 7 n 32 16", "CRA 7 32 16")]
+    [InlineData("Carrera 50AA # 10-20", "CRA 50AA 10 20")]
+    [InlineData("Calle 44AE # 52-10", "CL 44AE 52 10")]
+    [InlineData("calle 44 ae # 52-10", "CL 44AE 52 10")]
+    [InlineData("Diagonal 74B # 33AA - 19", "DG 74B 33AA 19")]
+    [InlineData("calle 59 ab bis # 80-12", "CL 59AB BIS 80 12")]
     public void TryParse_LetterVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -88,7 +93,7 @@ public sealed class AddressParserTests
         parsed.Should().BeTrue();
         address.Should().Be(new Address(
             RoadType.Calle,
-            new RoadNumber(59, 'A', IsBis: true, BisLetter: 'B'),
+            new RoadNumber(59, "A", IsBis: true, BisLetter: 'B'),
             new RoadNumber(80, IsBis: true),
             12));
     }
@@ -191,7 +196,7 @@ public sealed class AddressParserTests
         parsed.Should().BeTrue();
         address.Should().Be(new Address(
             RoadType.Calle,
-            new RoadNumber(59, 'A', IsBis: true, Quadrant: Quadrant.Sur),
+            new RoadNumber(59, "A", IsBis: true, Quadrant: Quadrant.Sur),
             new RoadNumber(80),
             12)
         {
@@ -396,7 +401,6 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12-5")]
     [InlineData("calle abc # 80-12")]
     [InlineData("calle 99999999999 # 80-12")]
-    [InlineData("calle 59 ab # 80-12")]
     [InlineData("calle 59 a b # 80-12")]
     [InlineData("calle 59 # 80-12 a")]
     [InlineData("calle a # 80-12")]

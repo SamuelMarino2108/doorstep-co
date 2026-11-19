@@ -23,7 +23,7 @@ public sealed class AddressFormatterTests
     [Fact]
     public void Format_AddressWithLetters_AppendsLettersToNumbers()
     {
-        var address = new Address(RoadType.Calle, new RoadNumber(59, 'A'), new RoadNumber(80, 'B'), 12);
+        var address = new Address(RoadType.Calle, new RoadNumber(59, "A"), new RoadNumber(80, "B"), 12);
 
         var formatted = AddressFormatter.Format(address);
 
@@ -31,11 +31,21 @@ public sealed class AddressFormatterTests
     }
 
     [Fact]
+    public void Format_AddressWithDoubleLetter_AppendsBothLetters()
+    {
+        var address = new Address(RoadType.Diagonal, new RoadNumber(74, "B"), new RoadNumber(33, "AA"), 19);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be("DG 74B 33AA 19");
+    }
+
+    [Fact]
     public void Format_AddressWithBis_WritesBisAndBisLetter()
     {
         var address = new Address(
             RoadType.Calle,
-            new RoadNumber(59, 'A', IsBis: true, BisLetter: 'B'),
+            new RoadNumber(59, "A", IsBis: true, BisLetter: 'B'),
             new RoadNumber(80, IsBis: true),
             12);
 

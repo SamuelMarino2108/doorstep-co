@@ -189,7 +189,7 @@ public static class AddressParser
         if (isBis)
         {
             position++;
-            bisLetter = ReadLetter(tokens, ref position);
+            bisLetter = ReadBisLetter(tokens, ref position);
         }
 
         road = new RoadNumber(number, letter, isBis, bisLetter);
@@ -209,12 +209,25 @@ public static class AddressParser
         }
     }
 
-    private static char? ReadLetter(IReadOnlyList<string> tokens, ref int position)
+    private static string? ReadLetter(IReadOnlyList<string> tokens, ref int position)
     {
         if (position < tokens.Count && RoadLetters.TryGetLetter(tokens[position], out var letter))
         {
             position++;
             return letter;
+        }
+
+        return null;
+    }
+
+    private static char? ReadBisLetter(IReadOnlyList<string> tokens, ref int position)
+    {
+        if (position < tokens.Count
+            && RoadLetters.TryGetLetter(tokens[position], out var letter)
+            && letter.Length == 1)
+        {
+            position++;
+            return letter[0];
         }
 
         return null;
