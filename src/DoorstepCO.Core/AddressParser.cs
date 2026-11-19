@@ -277,7 +277,10 @@ public static class AddressParser
             bisLetter = ReadBisLetter(tokens, ref position);
         }
 
-        return new RoadNumber(number, letter, isBis, bisLetter);
+        return new RoadNumber(number, letter?[0], isBis, bisLetter)
+        {
+            SecondLetter = letter is { Length: > 1 } ? letter[1] : null,
+        };
     }
 
     private static void ReadQuadrants(

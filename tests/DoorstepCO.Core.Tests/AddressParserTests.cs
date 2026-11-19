@@ -22,12 +22,25 @@ public sealed class AddressParserTests
     }
 
     [Fact]
+    public void TryParse_TwoLetters_ReturnsLetterAndSecondLetter()
+    {
+        var parsed = AddressParser.TryParse("calle 44ae # 33aa-19", out var address);
+
+        parsed.Should().BeTrue();
+        address.Should().Be(new Address(
+            RoadType.Calle,
+            new RoadNumber(44, 'A') { SecondLetter = 'E' },
+            new RoadNumber(33, 'A') { SecondLetter = 'A' },
+            19));
+    }
+
+    [Fact]
     public void TryParse_LettersOnRoadAndCross_ReturnsLetters()
     {
         var parsed = AddressParser.TryParse("calle 59a # 80 b - 12", out var address);
 
         parsed.Should().BeTrue();
-        address.Should().Be(new Address(RoadType.Calle, new RoadNumber(59, "A"), new RoadNumber(80, "B"), 12));
+        address.Should().Be(new Address(RoadType.Calle, new RoadNumber(59, 'A'), new RoadNumber(80, 'B'), 12));
     }
 
     [Theory]
@@ -101,7 +114,7 @@ public sealed class AddressParserTests
         parsed.Should().BeTrue();
         address.Should().Be(new Address(
             RoadType.Calle,
-            new RoadNumber(59, "A", IsBis: true, BisLetter: 'B'),
+            new RoadNumber(59, 'A', IsBis: true, BisLetter: 'B'),
             new RoadNumber(80, IsBis: true),
             12));
     }
@@ -272,7 +285,7 @@ public sealed class AddressParserTests
         parsed.Should().BeTrue();
         address.Should().Be(new Address(
             RoadType.Calle,
-            new RoadNumber(59, "A", IsBis: true, Quadrant: Quadrant.Sur),
+            new RoadNumber(59, 'A', IsBis: true, Quadrant: Quadrant.Sur),
             new RoadNumber(80),
             12)
         {

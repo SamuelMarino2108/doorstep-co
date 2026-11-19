@@ -109,8 +109,8 @@ curl -X POST http://localhost:5132/normalize \
 {
   "address": {
     "roadType": "Calle",
-    "road": { "number": 59, "letter": "A", "isBis": true, "bisLetter": null, "quadrant": "Sur", "name": null },
-    "cross": { "number": 80, "letter": null, "isBis": false, "bisLetter": null, "quadrant": null, "name": null },
+    "road": { "number": 59, "letter": "A", "isBis": true, "bisLetter": null, "quadrant": "Sur", "name": null, "secondLetter": null },
+    "cross": { "number": 80, "letter": null, "isBis": false, "bisLetter": null, "quadrant": null, "name": null, "secondLetter": null },
     "plateNumber": 12,
     "complements": [{ "type": "Apartamento", "value": "302" }],
     "remarks": "FRENTE AL PARQUE"
@@ -169,9 +169,11 @@ dotnet format --verify-no-changes
 
 Pushing a `v*` tag (for example `v0.2.0`) publishes `DoorstepCO.Core` to NuGet with that version.
 
-## Breaking changes in 0.2.0
+## Behavior changes in 0.2.0
 
-- `RoadNumber.Letter` is a `string?` instead of a `char?`, to hold two letters (`"AE"`).
+The public API only gains members (`Address.Remarks`, `RoadNumber.SecondLetter` and new enum values), so code
+written for 0.1.0 still compiles. Some results change:
+
 - `Address.Remarks` holds unrecognized trailing text, and `AddressFormatter.Format` appends it, so
   `Normalized` keeps it instead of dropping it.
 - `ValidationResult.Normalized` is not `null` for complement-only addresses even though `Address` is.

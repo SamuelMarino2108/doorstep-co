@@ -63,7 +63,10 @@ public static class AddressFormatter
             return name;
         }
 
-        var parts = new List<string> { road.Number.ToString(CultureInfo.InvariantCulture) + road.Letter };
+        var parts = new List<string>
+        {
+            road.Number.ToString(CultureInfo.InvariantCulture) + road.Letter + road.SecondLetter,
+        };
         if (road.IsBis)
         {
             parts.Add(ModifierAbbreviations.Bis);
