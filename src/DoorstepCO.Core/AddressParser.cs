@@ -125,14 +125,14 @@ public static class AddressParser
         List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants,
         [NotNullWhen(true)] out RoadNumber? road)
     {
-        if (TryReadRoadNumber(tokens, ref position, out road))
+        if (TryReadRoadNumber(tokens, ref position, out road, isMainRoad: true))
         {
             return true;
         }
 
         if (roadType != RoadType.Avenida)
         {
-            return false;
+            return TryReadOrdinalRoad(tokens, ref position, out road);
         }
 
         var name = ReadName(tokens, ref position);
@@ -157,6 +157,20 @@ public static class AddressParser
         return true;
     }
 
+    private static bool TryReadOrdinalRoad(
+        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)
+    {
+        road = null;
+        if (position >= tokens.Count || !OrdinalKeywords.TryGetNumber(tokens[position], out var number))
+        {
+            return false;
+        }
+
+        position++;
+        road = ReadModifiers(tokens, ref position, number, isMainRoad: true);
+        return true;
+    }
+
     private static string ReadName(IReadOnlyList<string> tokens, ref int position)
     {
         var words = new List<string>();
@@ -172,15 +186,39 @@ public static class AddressParser
     private static bool IsNameWord(string token) =>
         char.IsLetter(token[0])
         && !PlateSeparatorKeywords.IsPlateSeparator(token)
-        && !QuadrantKeywords.TryGetQuadrant(token, out _);
+        && !QuadrantKeywords.TryGetQuadrant(token, out _)
+        && !ImplicitQuadrantKeywords.IsImplicitQuadrant(token);
 
     private static bool TryReadRoadNumber(
-        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)
+        IReadOnlyList<string> tokens,
+        ref int position,
+        [NotNullWhen(true)] out RoadNumber? road,
+        bool isMainRoad = false)
     {
         road = null;
         if (!TryReadNumber(tokens, ref position, out var number))
         {
             return false;
+        }
+
+        road = ReadModifiers(tokens, ref position, number, isMainRoad);
+        return true;
+    }
+
+    /// <summary>
+    /// Reads what follows a road number: an ordinal suffix, letters and "bis". On the main road the letters may
+    /// be written after a dash ("calle 59-a"); elsewhere a dash separates the plate number.
+    /// </summary>
+    private static RoadNumber ReadModifiers(
+        IReadOnlyList<string> tokens, ref int position, int number, bool isMainRoad)
+    {
+        SkipIf(tokens, ref position, OrdinalKeywords.IsOrdinalSuffix);
+        if (isMainRoad
+            && position + 1 < tokens.Count
+            && tokens[position] == AddressTokenizer.Dash
+            && RoadLetters.TryGetLetter(tokens[position + 1], out _))
+        {
+            position++;
         }
 
         var letter = ReadLetter(tokens, ref position);
@@ -189,11 +227,10 @@ public static class AddressParser
         if (isBis)
         {
             position++;
-            bisLetter = ReadLetter(tokens, ref position);
+            bisLetter = ReadBisLetter(tokens, ref position);
         }
 
-        road = new RoadNumber(number, letter, isBis, bisLetter);
-        return true;
+        return new RoadNumber(number, letter, isBis, bisLetter);
     }
 
     private static void ReadQuadrants(
@@ -202,19 +239,40 @@ public static class AddressParser
         bool writtenOnRoad,
         List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants)
     {
-        while (position < tokens.Count && QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+        while (position < tokens.Count)
         {
-            quadrants.Add((quadrant, writtenOnRoad));
+            if (QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+            {
+                quadrants.Add((quadrant, writtenOnRoad));
+            }
+            else if (!ImplicitQuadrantKeywords.IsImplicitQuadrant(tokens[position]))
+            {
+                return;
+            }
+
             position++;
         }
     }
 
-    private static char? ReadLetter(IReadOnlyList<string> tokens, ref int position)
+    private static string? ReadLetter(IReadOnlyList<string> tokens, ref int position)
     {
         if (position < tokens.Count && RoadLetters.TryGetLetter(tokens[position], out var letter))
         {
             position++;
             return letter;
+        }
+
+        return null;
+    }
+
+    private static char? ReadBisLetter(IReadOnlyList<string> tokens, ref int position)
+    {
+        if (position < tokens.Count
+            && RoadLetters.TryGetLetter(tokens[position], out var letter)
+            && letter.Length == 1)
+        {
+            position++;
+            return letter[0];
         }
 
         return null;
