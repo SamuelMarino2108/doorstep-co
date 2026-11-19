@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace DoorstepCO.Api.Batch;
@@ -8,6 +9,7 @@ namespace DoorstepCO.Api.Batch;
 internal static class CsvBatch
 {
     private const int Windows1252CodePage = 1252;
+    private const string ConfidenceFormat = "0.00";
 
     private static readonly UTF8Encoding _strictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
     private static readonly UTF8Encoding _utf8WithBom = new(encoderShouldEmitUTF8Identifier: true);
@@ -33,7 +35,7 @@ internal static class CsvBatch
             throw new BatchFileException(BatchError.MissingAddressColumn);
         }
 
-        List<IReadOnlyList<string>> output = [[.. header, BatchColumns.NormalizedHeader]];
+        List<IReadOnlyList<string>> output = [[.. header, .. BatchColumns.ResultHeaders]];
         foreach (var row in rows.Skip(1))
         {
             output.Add(IsBlank(row) ? row : NormalizeRow(row, header.Count, addressColumn));
@@ -45,13 +47,16 @@ internal static class CsvBatch
 
     private static string[] NormalizeRow(IReadOnlyList<string> row, int headerCount, int addressColumn)
     {
-        var cells = new string[Math.Max(row.Count, headerCount) + 1];
-        for (var i = 0; i < cells.Length - 1; i++)
+        var cells = new string[Math.Max(row.Count, headerCount) + BatchColumns.ResultHeaders.Count];
+        for (var i = 0; i < cells.Length - BatchColumns.ResultHeaders.Count; i++)
         {
             cells[i] = i < row.Count ? row[i] : string.Empty;
         }
 
-        cells[^1] = BatchColumns.NormalizedValue(cells[addressColumn]);
+        var result = BatchColumns.Evaluate(cells[addressColumn]);
+        cells[^3] = result.Normalized;
+        cells[^2] = result.Confidence?.ToString(ConfidenceFormat, CultureInfo.InvariantCulture) ?? string.Empty;
+        cells[^1] = result.Issues;
         return cells;
     }
 

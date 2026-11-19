@@ -17,7 +17,7 @@ public enum IssueCode
     RuralAddress,
 
     /// <summary>
-    /// Text after the address was not recognized and was ignored, e.g. "frente al parque" in
+    /// Text after the address was not recognized and was kept as remarks, e.g. "frente al parque" in
     /// "Calle 59 # 80-12 frente al parque".
     /// </summary>
     UnrecognizedText,

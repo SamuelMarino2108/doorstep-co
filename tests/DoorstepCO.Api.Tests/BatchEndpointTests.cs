@@ -26,7 +26,7 @@ public sealed class BatchEndpointTests : IClassFixture<WebApplicationFactory<Pro
         response.Content.Headers.ContentType!.MediaType.Should().Be("text/csv");
         response.Content.Headers.ContentDisposition!.FileNameStar.Should().Be("pedidos-normalizada.csv");
         var body = Encoding.UTF8.GetString(await response.Content.ReadAsByteArrayAsync());
-        body.Should().Contain("ID;DIRECCION;NORMALIZADA\r\n1;cll 1 # 2-3;CL 1 2 3\r\n");
+        body.Should().Contain("ID;DIRECCION;NORMALIZADA;CONFIANZA;PROBLEMAS\r\n1;cll 1 # 2-3;CL 1 2 3;1.00;\r\n");
     }
 
     [Theory]

@@ -10,7 +10,7 @@ internal static class IssueMessages
         IssueCode.Empty => "The address is empty.",
         IssueCode.Unparseable => "The address could not be recognized as an urban address.",
         IssueCode.RuralAddress => "The address looks rural and does not follow the standard urban nomenclature.",
-        IssueCode.UnrecognizedText => "Text after the address was not recognized and was ignored.",
+        IssueCode.UnrecognizedText => "Text after the address was not recognized and was kept as remarks.",
         IssueCode.ZeroNumber => "The road, crossing road or plate number is 0.",
         IssueCode.PlateNumberOutOfRange => $"The plate number is greater than {AddressLimits.MaxPlateNumber}.",
         IssueCode.NamedRoad => "The main road is designated by a name that could not be matched to its standard number.",

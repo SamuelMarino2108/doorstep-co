@@ -6,7 +6,7 @@ namespace DoorstepCO.Api.Tests.Batch;
 public sealed class XlsxBatchTests
 {
     [Fact]
-    public void Normalize_ValidFile_AppendsNormalizedColumn()
+    public void Normalize_ValidFile_AppendsNormalizedConfidenceAndIssuesColumns()
     {
         var input = CreateWorkbook(
             ["ID", "DIRECCION", "CIUDAD"],
@@ -17,8 +17,14 @@ public sealed class XlsxBatchTests
 
         var sheet = output.Worksheet(1);
         sheet.Cell(1, 4).GetString().Should().Be("NORMALIZADA");
+        sheet.Cell(1, 5).GetString().Should().Be("CONFIANZA");
+        sheet.Cell(1, 6).GetString().Should().Be("PROBLEMAS");
         sheet.Cell(2, 4).GetString().Should().Be("CL 59A BIS SUR 80 12");
+        sheet.Cell(2, 5).Value.GetNumber().Should().Be(1.0);
+        sheet.Cell(2, 6).IsEmpty().Should().BeTrue();
         sheet.Cell(3, 4).IsEmpty().Should().BeTrue();
+        sheet.Cell(3, 5).Value.GetNumber().Should().Be(0.0);
+        sheet.Cell(3, 6).GetString().Should().Be("The address could not be recognized as an urban address.");
         sheet.Cell(2, 1).GetValue<int>().Should().Be(1);
         sheet.Cell(2, 3).GetString().Should().Be("Bogotá");
     }
@@ -37,7 +43,7 @@ public sealed class XlsxBatchTests
     }
 
     [Fact]
-    public void Normalize_HeaderRowStyle_CopiedToNewHeader()
+    public void Normalize_HeaderRowStyle_CopiedToNewHeaders()
     {
         using var workbook = new XLWorkbook();
         var sheet = workbook.AddWorksheet("Pedidos");
@@ -48,11 +54,12 @@ public sealed class XlsxBatchTests
         using var output = Open(XlsxBatch.Normalize(Save(workbook)));
 
         output.Worksheet(1).Cell(1, 2).Style.Font.Bold.Should().BeTrue();
+        output.Worksheet(1).Cell(1, 4).Style.Font.Bold.Should().BeTrue();
         output.Worksheet(1).Name.Should().Be("Pedidos");
     }
 
     [Fact]
-    public void Normalize_EmptyAddressCells_LeavesNormalizedCellEmpty()
+    public void Normalize_EmptyAddressCells_LeavesResultCellsEmpty()
     {
         var input = CreateWorkbook(["DIRECCION", "ID"], ["", 1], ["cll 1 # 2-3", 2]);
 
@@ -60,6 +67,8 @@ public sealed class XlsxBatchTests
 
         var sheet = output.Worksheet(1);
         sheet.Cell(2, 3).IsEmpty().Should().BeTrue();
+        sheet.Cell(2, 4).IsEmpty().Should().BeTrue();
+        sheet.Cell(2, 5).IsEmpty().Should().BeTrue();
         sheet.Cell(3, 3).GetString().Should().Be("CL 1 2 3");
     }
 

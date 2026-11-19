@@ -54,10 +54,10 @@ public sealed class AddressValidatorTests
     }
 
     [Theory]
-    [InlineData("calle 59 # 80-12 apto 302 frente al parque", "CL 59 80 12 AP 302")]
-    [InlineData("calle 59 # 80-12 edificio azul", "CL 59 80 12")]
-    [InlineData("calle 59 # 80-12 apto", "CL 59 80 12")]
-    public void Validate_TrailingUnrecognizedText_ReturnsRecognizedPartWithUnrecognizedTextIssue(
+    [InlineData("calle 59 # 80-12 apto 302 frente al parque", "CL 59 80 12 AP 302 FRENTE AL PARQUE")]
+    [InlineData("calle 59 # 80-12 edificio azul", "CL 59 80 12 EDIFICIO AZUL")]
+    [InlineData("calle 59 # 80-12 apto", "CL 59 80 12 APTO")]
+    public void Validate_TrailingUnrecognizedText_KeepsTextAtTheEndWithUnrecognizedTextIssue(
         string input, string expected)
     {
         var result = AddressValidator.Validate(input);
@@ -73,6 +73,22 @@ public sealed class AddressValidatorTests
         var result = AddressValidator.Validate("calle 59 # 80-12 frente al parque");
 
         result.Issues.Single().Message.Should().Contain("\"frente al parque\"");
+    }
+
+    [Fact]
+    public void Validate_TrailingUnrecognizedText_StoresTextAsRemarks()
+    {
+        var result = AddressValidator.Validate("calle 59 # 80-12 frente al Párque");
+
+        result.Address!.Remarks.Should().Be("FRENTE AL PARQUE");
+    }
+
+    [Fact]
+    public void Validate_NoTrailingText_LeavesRemarksEmpty()
+    {
+        var result = AddressValidator.Validate("calle 59 # 80-12 apto 302");
+
+        result.Address!.Remarks.Should().BeNull();
     }
 
     [Theory]
@@ -94,7 +110,7 @@ public sealed class AddressValidatorTests
     {
         var result = AddressValidator.Validate("calle 5 # 3-20 vereda el salitre");
 
-        result.Normalized.Should().Be("CL 5 3 20");
+        result.Normalized.Should().Be("CL 5 3 20 VEREDA EL SALITRE");
         result.Confidence.Should().Be(0.0);
         result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.RuralAddress, IssueCode.UnrecognizedText);
     }
