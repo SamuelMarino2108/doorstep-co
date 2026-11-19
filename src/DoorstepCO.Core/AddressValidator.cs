@@ -30,10 +30,16 @@ public static class AddressValidator
             issues.Add(Issue(IssueCode.RuralAddress));
         }
 
-        if (!AddressParser.TryParse(input, out var address, out var unrecognizedText))
+        if (AddressParser.Parse(input) is not (var address, var unrecognizedText, var misspelledRoadType))
         {
             issues.Add(Issue(IssueCode.Unparseable));
             return Result(null, issues);
+        }
+
+        if (misspelledRoadType is not null)
+        {
+            issues.Add(new AddressIssue(
+                IssueCode.CorrectedTypo, IssueMessages.For(IssueCode.CorrectedTypo, misspelledRoadType)));
         }
 
         if (unrecognizedText.Length > 0)

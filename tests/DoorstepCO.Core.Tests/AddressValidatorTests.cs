@@ -100,6 +100,27 @@ public sealed class AddressValidatorTests
     }
 
     [Fact]
+    public void Validate_MisspelledRoadType_ReturnsCorrectedTypoIssue()
+    {
+        var result = AddressValidator.Validate("Carrerra 7 # 10-20");
+
+        result.Normalized.Should().Be("CRA 7 10 20");
+        result.Confidence.Should().Be(0.9);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.CorrectedTypo);
+        result.Issues.Single().Message.Should().Contain("\"carrerra\"");
+    }
+
+    [Fact]
+    public void Validate_NamedAutopista_ReturnsNamedRoadIssue()
+    {
+        var result = AddressValidator.Validate("Autopista Norte # 128-50");
+
+        result.Normalized.Should().Be("AU NORTE 128 50");
+        result.Confidence.Should().Be(0.8);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.NamedRoad);
+    }
+
+    [Fact]
     public void Validate_TrailingUnrecognizedText_StoresTextAsRemarks()
     {
         var result = AddressValidator.Validate("calle 59 # 80-12 frente al Párque");

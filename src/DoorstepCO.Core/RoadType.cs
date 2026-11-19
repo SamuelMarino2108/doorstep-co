@@ -25,4 +25,13 @@ public enum RoadType
 
     /// <summary>Avenida carrera (AK).</summary>
     AvenidaCarrera,
+
+    /// <summary>Autopista (AU).</summary>
+    Autopista,
+
+    /// <summary>Circular (CQ).</summary>
+    Circular,
+
+    /// <summary>Circunvalar (CV).</summary>
+    Circunvalar,
 }

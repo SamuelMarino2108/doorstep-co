@@ -16,6 +16,7 @@ internal static class IssueMessages
         IssueCode.NamedRoad => "The main road is designated by a name that could not be matched to its standard number.",
         IssueCode.IncompleteComplement =>
             "A complement has no value or its value was not recognized; the text was kept as remarks.",
+        IssueCode.CorrectedTypo => "The road type looked misspelled and was corrected.",
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
 

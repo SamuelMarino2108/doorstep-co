@@ -18,9 +18,9 @@ public static class AddressParser
     /// <returns><see langword="true"/> when the input was parsed; otherwise <see langword="false"/>.</returns>
     public static bool TryParse(string input, [NotNullWhen(true)] out Address? address)
     {
-        if (TryParse(input, out var parsed, out var unrecognizedText) && unrecognizedText.Length == 0)
+        if (Parse(input) is { UnrecognizedText.Length: 0 } outcome)
         {
-            address = parsed;
+            address = outcome.Address;
             return true;
         }
 
@@ -30,22 +30,21 @@ public static class AddressParser
 
     /// <summary>
     /// Like <see cref="TryParse(string, out Address?)"/>, but tolerates unrecognized text after the address: it
-    /// returns the recognized part and the normalized tokens that were left over, separated by spaces.
+    /// returns the recognized part and the normalized tokens that were left over, or <see langword="null"/> when
+    /// the input does not start with an address.
     /// </summary>
-    internal static bool TryParse(
-        string input, [NotNullWhen(true)] out Address? address, out string unrecognizedText)
+    internal static ParseOutcome? Parse(string input)
     {
-        address = null;
-        unrecognizedText = string.Empty;
         var tokens = AddressTokenizer.Tokenize(input);
         var position = 0;
 
         var quadrants = new List<(Quadrant Quadrant, bool WrittenOnRoad)>();
 
-        if (!TryReadRoadType(tokens, ref position, out var roadType)
+        string? misspelledRoadType = null;
+        if (!TryReadRoadType(tokens, ref position, out var roadType, ref misspelledRoadType)
             || !TryReadRoad(tokens, ref position, ref roadType, quadrants, out var road))
         {
-            return false;
+            return null;
         }
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: true, quadrants);
@@ -53,7 +52,7 @@ public static class AddressParser
 
         if (!TryReadRoadNumber(tokens, ref position, out var cross))
         {
-            return false;
+            return null;
         }
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
@@ -61,7 +60,7 @@ public static class AddressParser
 
         if (!TryReadNumber(tokens, ref position, out var plateNumber))
         {
-            return false;
+            return null;
         }
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
@@ -70,11 +69,11 @@ public static class AddressParser
 
         if (!QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
         {
-            return false;
+            return null;
         }
 
-        unrecognizedText = string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
-        address = new Address(
+        var unrecognizedText = string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
+        var address = new Address(
             roadType,
             road with { Quadrant = roadQuadrant },
             cross with { Quadrant = crossQuadrant },
@@ -82,7 +81,7 @@ public static class AddressParser
         {
             Complements = complements,
         };
-        return true;
+        return new ParseOutcome(address, unrecognizedText, misspelledRoadType);
     }
 
     private static int LocationSuffixStart(IReadOnlyList<string> tokens, int start)
@@ -98,23 +97,51 @@ public static class AddressParser
         return tokens.Count;
     }
 
-    private static bool TryReadRoadType(IReadOnlyList<string> tokens, ref int position, out RoadType roadType)
+    private static bool TryReadRoadType(
+        IReadOnlyList<string> tokens, ref int position, out RoadType roadType, ref string? misspelled)
     {
-        roadType = default;
-        if (position >= tokens.Count || !RoadTypeKeywords.TryGetRoadType(tokens[position], out roadType))
+        if (!TryMatchRoadType(tokens, position, out roadType, ref misspelled))
         {
             return false;
         }
 
         position++;
-        if (position < tokens.Count
-            && RoadTypeKeywords.TryGetRoadType(tokens[position], out var second)
+        var secondMisspelled = misspelled;
+        if (TryMatchRoadType(tokens, position, out var second, ref secondMisspelled)
             && RoadTypeKeywords.TryCombine(roadType, second, out var compound))
         {
             roadType = compound;
+            misspelled = secondMisspelled;
             position++;
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Matches the token at <paramref name="position"/> to a road type, exactly or as a corrected typo. A typo
+    /// sets <paramref name="misspelled"/> to the word as written.
+    /// </summary>
+    private static bool TryMatchRoadType(
+        IReadOnlyList<string> tokens, int position, out RoadType roadType, ref string? misspelled)
+    {
+        roadType = default;
+        if (position >= tokens.Count)
+        {
+            return false;
+        }
+
+        if (RoadTypeKeywords.TryGetRoadType(tokens[position], out roadType))
+        {
+            return true;
+        }
+
+        if (!RoadTypeKeywords.TryCorrectRoadType(tokens[position], out roadType))
+        {
+            return false;
+        }
+
+        misspelled = tokens[position];
         return true;
     }
 
@@ -130,7 +157,7 @@ public static class AddressParser
             return true;
         }
 
-        if (roadType != RoadType.Avenida)
+        if (!RoadTypeKeywords.CanBeNamed(roadType))
         {
             return TryReadOrdinalRoad(tokens, ref position, out road);
         }
@@ -141,7 +168,7 @@ public static class AddressParser
             return false;
         }
 
-        if (!NamedAvenues.TryGetRoad(name, out var namedType, out var namedRoad))
+        if (roadType != RoadType.Avenida || !NamedAvenues.TryGetRoad(name, out var namedType, out var namedRoad))
         {
             road = new RoadNumber(0, Name: name.ToUpperInvariant());
             return true;
@@ -171,10 +198,14 @@ public static class AddressParser
         return true;
     }
 
+    /// <summary>
+    /// Reads the name of a road designated by name. A quadrant word ends the name, except as its first word, where
+    /// it is the name itself ("autopista sur", "autopista norte").
+    /// </summary>
     private static string ReadName(IReadOnlyList<string> tokens, ref int position)
     {
         var words = new List<string>();
-        while (position < tokens.Count && IsNameWord(tokens[position]))
+        while (position < tokens.Count && IsNameWord(tokens[position], isFirst: words.Count == 0))
         {
             words.Add(tokens[position]);
             position++;
@@ -183,11 +214,13 @@ public static class AddressParser
         return string.Join(' ', words);
     }
 
-    private static bool IsNameWord(string token) =>
+    private static bool IsNameWord(string token, bool isFirst) =>
         char.IsLetter(token[0])
         && !PlateSeparatorKeywords.IsPlateSeparator(token)
-        && !QuadrantKeywords.TryGetQuadrant(token, out _)
-        && !ImplicitQuadrantKeywords.IsImplicitQuadrant(token);
+        && ((isFirst && token.Length > 1) || !IsQuadrantWord(token));
+
+    private static bool IsQuadrantWord(string token) =>
+        QuadrantKeywords.TryGetQuadrant(token, out _) || ImplicitQuadrantKeywords.IsImplicitQuadrant(token);
 
     private static bool TryReadRoadNumber(
         IReadOnlyList<string> tokens,

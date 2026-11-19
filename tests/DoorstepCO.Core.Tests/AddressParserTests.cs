@@ -57,6 +57,11 @@ public sealed class AddressParserTests
     [InlineData("Ave 68 # 13-45", "AV 68 13 45")]
     [InlineData("AC 26 # 50-01", "AC 26 50 1")]
     [InlineData("ak 15 # 100-20", "AK 15 100 20")]
+    [InlineData("K 7 # 10-20", "CRA 7 10 20")]
+    [InlineData("Circular 1 # 70-50", "CQ 1 70 50")]
+    [InlineData("circ. 3 # 66b-20", "CQ 3 66B 20")]
+    [InlineData("Autopista 45 # 128-50", "AU 45 128 50")]
+    [InlineData("Circunvalar 5 # 20-30", "CV 5 20 30")]
     public void TryParse_KeywordAndSeparatorVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -132,6 +137,25 @@ public sealed class AddressParserTests
 
         parsed.Should().BeTrue();
         AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("Carrerra 7 # 10-20", "CRA 7 10 20", "carrerra")]
+    [InlineData("calel 59 # 80-12", "CL 59 80 12", "calel")]
+    [InlineData("Avenda Carrera 68 # 22-10", "AK 68 22 10", "avenda")]
+    [InlineData("Avenida Carerra 68 # 22-10", "AK 68 22 10", "carerra")]
+    public void Parse_MisspelledRoadType_CorrectsAndReportsWord(string input, string expected, string misspelled)
+    {
+        var outcome = AddressParser.Parse(input);
+
+        AddressFormatter.Format(outcome!.Address).Should().Be(expected);
+        outcome.MisspelledRoadType.Should().Be(misspelled);
+    }
+
+    [Fact]
+    public void Parse_CorrectlySpelledRoadType_ReportsNoMisspelling()
+    {
+        AddressParser.Parse("carrera 7 # 10-20")!.MisspelledRoadType.Should().BeNull();
     }
 
     [Theory]
@@ -378,21 +402,19 @@ public sealed class AddressParserTests
     }
 
     [Fact]
-    public void TryParseWithUnrecognized_CityBeforeOtherText_KeepsCityInUnrecognizedText()
+    public void Parse_CityBeforeOtherText_KeepsCityInUnrecognizedText()
     {
-        var parsed = AddressParser.TryParse("cra 7 # 10-20 bogota frente al parque", out _, out var unrecognizedText);
+        var outcome = AddressParser.Parse("cra 7 # 10-20 bogota frente al parque");
 
-        parsed.Should().BeTrue();
-        unrecognizedText.Should().Be("bogota frente al parque");
+        outcome!.UnrecognizedText.Should().Be("bogota frente al parque");
     }
 
     [Fact]
-    public void TryParseWithUnrecognized_TextThenCity_DropsOnlyCity()
+    public void Parse_TextThenCity_DropsOnlyCity()
     {
-        var parsed = AddressParser.TryParse("cra 7 # 10-20 frente al parque cali", out _, out var unrecognizedText);
+        var outcome = AddressParser.Parse("cra 7 # 10-20 frente al parque cali");
 
-        parsed.Should().BeTrue();
-        unrecognizedText.Should().Be("frente al parque");
+        outcome!.UnrecognizedText.Should().Be("frente al parque");
     }
 
     [Fact]
@@ -407,12 +429,11 @@ public sealed class AddressParserTests
     }
 
     [Fact]
-    public void TryParseWithUnrecognized_TrailingDash_KeepsDashAsUnrecognized()
+    public void Parse_TrailingDash_KeepsDashAsUnrecognized()
     {
-        var parsed = AddressParser.TryParse("cra 7 # 10-20 apto 302 -", out _, out var unrecognizedText);
+        var outcome = AddressParser.Parse("cra 7 # 10-20 apto 302 -");
 
-        parsed.Should().BeTrue();
-        unrecognizedText.Should().Be("-");
+        outcome!.UnrecognizedText.Should().Be("-");
     }
 
     [Fact]
@@ -492,13 +513,12 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12")]
     [InlineData("calle 59 # 80-12 apto 302")]
     [InlineData("calle 59 # 80-12 conjunto los pinos torre 2")]
-    public void TryParseWithUnrecognized_FullyRecognizedAddress_ReturnsEmptyUnrecognizedText(string input)
+    public void Parse_FullyRecognizedAddress_ReturnsEmptyUnrecognizedText(string input)
     {
-        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+        var outcome = AddressParser.Parse(input);
 
-        parsed.Should().BeTrue();
-        address.Should().NotBeNull();
-        unrecognizedText.Should().BeEmpty();
+        outcome.Should().NotBeNull();
+        outcome!.UnrecognizedText.Should().BeEmpty();
     }
 
     [Theory]
@@ -510,14 +530,13 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 bis", "CL 59 80 12", "bis")]
     [InlineData("calle 59 # 80-12 apto 302 # 5", "CL 59 80 12 AP 302", "# 5")]
     [InlineData("kr 7 este # 32-16 Puerta Azul", "CRA 7 ESTE 32 16", "puerta azul")]
-    public void TryParseWithUnrecognized_TrailingText_ReturnsRecognizedPartAndText(
+    public void Parse_TrailingText_ReturnsRecognizedPartAndText(
         string input, string expected, string expectedUnrecognized)
     {
-        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+        var outcome = AddressParser.Parse(input);
 
-        parsed.Should().BeTrue();
-        AddressFormatter.Format(address!).Should().Be(expected);
-        unrecognizedText.Should().Be(expectedUnrecognized);
+        AddressFormatter.Format(outcome!.Address).Should().Be(expected);
+        outcome.UnrecognizedText.Should().Be(expectedUnrecognized);
     }
 
     [Theory]
@@ -526,13 +545,9 @@ public sealed class AddressParserTests
     [InlineData("calle 59 frente # 80-12")]
     [InlineData("frente calle 59 # 80-12")]
     [InlineData("av 68 sur este # 13-45")]
-    public void TryParseWithUnrecognized_IncompleteAddress_ReturnsFalse(string input)
+    public void Parse_IncompleteAddress_ReturnsFalse(string input)
     {
-        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
-
-        parsed.Should().BeFalse();
-        address.Should().BeNull();
-        unrecognizedText.Should().BeEmpty();
+        AddressParser.Parse(input).Should().BeNull();
     }
 
     [Theory]
@@ -568,6 +583,11 @@ public sealed class AddressParserTests
     [Theory]
     [InlineData("av el poblado sur # 30-28 apto 302", "AV EL POBLADO SUR 30 28 AP 302")]
     [InlineData("Av. Américas # 68-20", "AV AMERICAS 68 20")]
+    [InlineData("Autopista Norte # 128-50", "AU NORTE 128 50")]
+    [InlineData("autopista sur # 50-10", "AU SUR 50 10")]
+    [InlineData("Autopista Medellín # 10-20", "AU MEDELLIN 10 20")]
+    [InlineData("Avenida Circunvalar # 20-30", "AV CIRCUNVALAR 20 30")]
+    [InlineData("Circunvalar El Poblado # 20-30", "CV EL POBLADO 20 30")]
     public void TryParse_UnknownNamedAvenue_FormatsWithName(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -581,6 +601,8 @@ public sealed class AddressParserTests
     [InlineData("av el poblado")]
     [InlineData("av el poblado # 30")]
     [InlineData("calle real # 30-28")]
+    [InlineData("circular real # 30-28")]
+    [InlineData("autopista # 30-28")]
     [InlineData("av calle real # 30-28")]
     public void TryParse_InvalidNamedRoad_ReturnsFalse(string input)
     {

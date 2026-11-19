@@ -19,6 +19,7 @@ internal static class IssuePenalties
         IssueCode.PlateNumberOutOfRange => 0.3,
         IssueCode.NamedRoad => 0.2,
         IssueCode.IncompleteComplement => 0.3,
+        IssueCode.CorrectedTypo => 0.1,
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
 

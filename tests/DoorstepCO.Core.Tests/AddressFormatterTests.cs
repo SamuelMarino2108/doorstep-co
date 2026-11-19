@@ -10,6 +10,9 @@ public sealed class AddressFormatterTests
     [InlineData(RoadType.Avenida, 68, 13, 45, "AV 68 13 45")]
     [InlineData(RoadType.AvenidaCalle, 26, 50, 1, "AC 26 50 1")]
     [InlineData(RoadType.AvenidaCarrera, 15, 100, 20, "AK 15 100 20")]
+    [InlineData(RoadType.Autopista, 45, 128, 50, "AU 45 128 50")]
+    [InlineData(RoadType.Circular, 1, 70, 50, "CQ 1 70 50")]
+    [InlineData(RoadType.Circunvalar, 5, 20, 30, "CV 5 20 30")]
     public void Format_Address_ReturnsStandardForm(
         RoadType roadType, int roadNumber, int crossNumber, int plateNumber, string expected)
     {

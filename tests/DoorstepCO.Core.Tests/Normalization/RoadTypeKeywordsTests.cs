@@ -21,12 +21,50 @@ public sealed class RoadTypeKeywordsTests
     [InlineData("ave", RoadType.Avenida)]
     [InlineData("ac", RoadType.AvenidaCalle)]
     [InlineData("ak", RoadType.AvenidaCarrera)]
+    [InlineData("k", RoadType.Carrera)]
+    [InlineData("autopista", RoadType.Autopista)]
+    [InlineData("autop", RoadType.Autopista)]
+    [InlineData("au", RoadType.Autopista)]
+    [InlineData("circular", RoadType.Circular)]
+    [InlineData("circ", RoadType.Circular)]
+    [InlineData("cq", RoadType.Circular)]
+    [InlineData("circunvalar", RoadType.Circunvalar)]
+    [InlineData("circunv", RoadType.Circunvalar)]
+    [InlineData("cv", RoadType.Circunvalar)]
     public void TryGetRoadType_KnownKeyword_ReturnsRoadType(string keyword, RoadType expected)
     {
         var found = RoadTypeKeywords.TryGetRoadType(keyword, out var roadType);
 
         found.Should().BeTrue();
         roadType.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("carrerra", RoadType.Carrera)]
+    [InlineData("carerra", RoadType.Carrera)]
+    [InlineData("calel", RoadType.Calle)]
+    [InlineData("callle", RoadType.Calle)]
+    [InlineData("diagonl", RoadType.Diagonal)]
+    [InlineData("transversl", RoadType.Transversal)]
+    [InlineData("avenda", RoadType.Avenida)]
+    [InlineData("autopsta", RoadType.Autopista)]
+    public void TryCorrectRoadType_MisspelledKeyword_ReturnsRoadType(string word, RoadType expected)
+    {
+        var found = RoadTypeKeywords.TryCorrectRoadType(word, out var roadType);
+
+        found.Should().BeTrue();
+        roadType.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("valle")]
+    [InlineData("barrio")]
+    [InlineData("cale")]
+    [InlineData("carrera")]
+    [InlineData("conjunto")]
+    public void TryCorrectRoadType_ExactOrUnrelatedWord_ReturnsFalse(string word)
+    {
+        RoadTypeKeywords.TryCorrectRoadType(word, out _).Should().BeFalse();
     }
 
     [Theory]
