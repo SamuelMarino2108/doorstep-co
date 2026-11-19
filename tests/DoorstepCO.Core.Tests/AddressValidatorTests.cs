@@ -176,10 +176,10 @@ public sealed class AddressValidatorTests
     }
 
     [Theory]
-    [InlineData("calle 59 # 80-151")]
+    [InlineData("calle 59 # 80-251")]
     [InlineData("calle 59 # 80-850")]
     [InlineData("calle 59 # 80-9999")]
-    public void Validate_PlateNumberAbove150_ReturnsPlateNumberOutOfRangeIssue(string input)
+    public void Validate_PlateNumberAbove250_ReturnsPlateNumberOutOfRangeIssue(string input)
     {
         var result = AddressValidator.Validate(input);
 
@@ -191,8 +191,10 @@ public sealed class AddressValidatorTests
     [Theory]
     [InlineData("calle 59 # 80-1")]
     [InlineData("calle 59 # 80-150")]
+    [InlineData("cr 43a # 1 sur - 188")]
+    [InlineData("calle 59 # 80-250")]
     [InlineData("calle 200 # 300-99")]
-    public void Validate_PlateNumberUpTo150_ReturnsNoIssues(string input)
+    public void Validate_PlateNumberUpTo250_ReturnsNoIssues(string input)
     {
         AddressValidator.Validate(input).Issues.Should().BeEmpty();
     }
