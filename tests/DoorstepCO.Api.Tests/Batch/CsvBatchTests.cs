@@ -8,16 +8,29 @@ public sealed class CsvBatchTests
     private static readonly Encoding _utf8WithBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
 
     [Fact]
-    public void Normalize_ValidFile_AppendsNormalizedColumn()
+    public void Normalize_ValidFile_AppendsNormalizedConfidenceAndIssuesColumns()
     {
         var input = "ID;DIRECCION;CIUDAD\r\n1;cll 59 a bis sur # 80-12;Bogotá\r\n2;frente al parque;Cali\r\n";
 
         var output = Decode(CsvBatch.Normalize(Encoding.UTF8.GetBytes(input)));
 
         output.Should().Be(
-            "ID;DIRECCION;CIUDAD;NORMALIZADA\r\n" +
-            "1;cll 59 a bis sur # 80-12;Bogotá;CL 59A BIS SUR 80 12\r\n" +
-            "2;frente al parque;Cali;\r\n");
+            "ID;DIRECCION;CIUDAD;NORMALIZADA;CONFIANZA;PROBLEMAS\r\n" +
+            "1;cll 59 a bis sur # 80-12;Bogotá;CL 59A BIS SUR 80 12;1.00;\r\n" +
+            "2;frente al parque;Cali;;0.00;The address could not be recognized as an urban address.\r\n");
+    }
+
+    [Fact]
+    public void Normalize_AddressWithSeveralIssues_JoinsIssueMessagesInOneQuotedCell()
+    {
+        var input = "DIRECCION;ID\ncll 0 # 2-3 frente al parque;1\n";
+
+        var output = Decode(CsvBatch.Normalize(Encoding.UTF8.GetBytes(input)));
+
+        output.Should().EndWith(
+            ";1;CL 0 2 3 FRENTE AL PARQUE;0.30;\"" +
+            "Text after the address was not recognized and was kept as remarks. \"\"frente al parque\"\"; " +
+            "The road, crossing road or plate number is 0.\"\r\n");
     }
 
     [Theory]
@@ -31,7 +44,7 @@ public sealed class CsvBatchTests
 
         var output = Decode(CsvBatch.Normalize(Encoding.UTF8.GetBytes(input)));
 
-        output.Should().EndWith("CRA 7 10 20\r\n");
+        output.Should().EndWith("CRA 7 10 20,1.00,\r\n");
     }
 
     [Fact]
@@ -60,7 +73,8 @@ public sealed class CsvBatchTests
 
         var output = Decode(CsvBatch.Normalize(Encoding.UTF8.GetBytes(input)));
 
-        output.Should().Be("ID,DIRECCION,NORMALIZADA\r\n1,,\r\n\r\n2,cll 1 # 2-3,CL 1 2 3\r\n");
+        output.Should().Be(
+            "ID,DIRECCION,NORMALIZADA,CONFIANZA,PROBLEMAS\r\n1,,,,\r\n\r\n2,cll 1 # 2-3,CL 1 2 3,1.00,\r\n");
     }
 
     [Fact]

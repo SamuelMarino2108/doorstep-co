@@ -26,23 +26,38 @@ internal static class XlsxBatch
 
         var addressColumn = headerCells[addressIndex].Address.ColumnNumber;
         var normalizedColumn = sheet.LastColumnUsed()!.ColumnNumber() + 1;
-        var normalizedHeader = headerRow.Cell(normalizedColumn);
-        normalizedHeader.Value = BatchColumns.NormalizedHeader;
-        normalizedHeader.Style = headerCells[^1].Style;
+        var confidenceColumn = normalizedColumn + 1;
+        var issuesColumn = normalizedColumn + 2;
+        for (var i = 0; i < BatchColumns.ResultHeaders.Count; i++)
+        {
+            var header = headerRow.Cell(normalizedColumn + i);
+            header.Value = BatchColumns.ResultHeaders[i];
+            header.Style = headerCells[^1].Style;
+        }
 
         var lastRow = sheet.LastRowUsed()!.RowNumber();
         for (var row = headerRow.RowNumber() + 1; row <= lastRow; row++)
         {
-            var normalized = BatchColumns.NormalizedValue(sheet.Cell(row, addressColumn).GetFormattedString());
-            if (normalized.Length > 0)
+            var result = BatchColumns.Evaluate(sheet.Cell(row, addressColumn).GetFormattedString());
+            SetIfNotEmpty(sheet.Cell(row, normalizedColumn), result.Normalized);
+            SetIfNotEmpty(sheet.Cell(row, issuesColumn), result.Issues);
+            if (result.Confidence is { } confidence)
             {
-                sheet.Cell(row, normalizedColumn).Value = normalized;
+                sheet.Cell(row, confidenceColumn).Value = confidence;
             }
         }
 
         using var output = new MemoryStream();
         workbook.SaveAs(output);
         return output.ToArray();
+    }
+
+    private static void SetIfNotEmpty(IXLCell cell, string value)
+    {
+        if (value.Length > 0)
+        {
+            cell.Value = value;
+        }
     }
 
     private static XLWorkbook Open(byte[] content)

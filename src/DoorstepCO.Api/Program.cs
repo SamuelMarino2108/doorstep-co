@@ -61,8 +61,8 @@ app.MapPost("/normalize/batch", async (IFormFile file, CancellationToken cancell
     })
     .WithName("NormalizeBatch")
     .WithTags("Normalize")
-    .WithDescription("Upload a .csv or .xlsx file with a DIRECCION column; returns the same file with a "
-        + "NORMALIZADA column appended.")
+    .WithDescription("Upload a .csv or .xlsx file with a DIRECCION column; returns the same file with "
+        + "NORMALIZADA, CONFIANZA and PROBLEMAS columns appended.")
     .DisableAntiforgery()
     .Produces(StatusCodes.Status200OK, contentType: "application/octet-stream")
     .ProducesProblem(StatusCodes.Status400BadRequest);

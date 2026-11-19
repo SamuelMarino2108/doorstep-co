@@ -11,6 +11,11 @@ internal static class BatchColumns
 {
     public const string AddressHeader = "DIRECCION";
     public const string NormalizedHeader = "NORMALIZADA";
+    public const string ConfidenceHeader = "CONFIANZA";
+    public const string IssuesHeader = "PROBLEMAS";
+    public const string IssueSeparator = "; ";
+
+    public static readonly IReadOnlyList<string> ResultHeaders = [NormalizedHeader, ConfidenceHeader, IssuesHeader];
 
     public static int FindAddressColumn(IReadOnlyList<string> headers)
     {
@@ -25,8 +30,19 @@ internal static class BatchColumns
         return -1;
     }
 
-    public static string NormalizedValue(string? address) =>
-        string.IsNullOrWhiteSpace(address) ? string.Empty : AddressValidator.Validate(address).Normalized ?? string.Empty;
+    public static BatchRow Evaluate(string? address)
+    {
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            return BatchRow.Blank;
+        }
+
+        var result = AddressValidator.Validate(address);
+        return new BatchRow(
+            result.Normalized ?? string.Empty,
+            result.Confidence,
+            string.Join(IssueSeparator, result.Issues.Select(issue => issue.Message)));
+    }
 
     private static string RemoveAccents(string text)
     {
