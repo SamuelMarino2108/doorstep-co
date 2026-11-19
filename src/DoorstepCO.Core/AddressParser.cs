@@ -132,7 +132,7 @@ public static class AddressParser
 
         if (roadType != RoadType.Avenida)
         {
-            return false;
+            return TryReadOrdinalRoad(tokens, ref position, out road);
         }
 
         var name = ReadName(tokens, ref position);
@@ -154,6 +154,20 @@ public static class AddressParser
         }
 
         road = namedRoad with { Quadrant = null };
+        return true;
+    }
+
+    private static bool TryReadOrdinalRoad(
+        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)
+    {
+        road = null;
+        if (position >= tokens.Count || !OrdinalKeywords.TryGetNumber(tokens[position], out var number))
+        {
+            return false;
+        }
+
+        position++;
+        road = ReadModifiers(tokens, ref position, number);
         return true;
     }
 
@@ -183,6 +197,13 @@ public static class AddressParser
             return false;
         }
 
+        road = ReadModifiers(tokens, ref position, number);
+        return true;
+    }
+
+    private static RoadNumber ReadModifiers(IReadOnlyList<string> tokens, ref int position, int number)
+    {
+        SkipIf(tokens, ref position, OrdinalKeywords.IsOrdinalSuffix);
         var letter = ReadLetter(tokens, ref position);
         var isBis = position < tokens.Count && BisKeywords.IsBis(tokens[position]);
         char? bisLetter = null;
@@ -192,8 +213,7 @@ public static class AddressParser
             bisLetter = ReadBisLetter(tokens, ref position);
         }
 
-        road = new RoadNumber(number, letter, isBis, bisLetter);
-        return true;
+        return new RoadNumber(number, letter, isBis, bisLetter);
     }
 
     private static void ReadQuadrants(

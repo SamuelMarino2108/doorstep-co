@@ -99,6 +99,33 @@ public sealed class AddressParserTests
     }
 
     [Theory]
+    [InlineData("Calle 1ra # 2-3", "CL 1 2 3")]
+    [InlineData("calle 1 ra # 2-3", "CL 1 2 3")]
+    [InlineData("Calle 1era # 2-3", "CL 1 2 3")]
+    [InlineData("Calle 2da # 10-20", "CL 2 10 20")]
+    [InlineData("Carrera 3er # 10-20", "CRA 3 10 20")]
+    [InlineData("Carrera 4ta a # 10-20", "CRA 4A 10 20")]
+    [InlineData("Calle 1a # 2-3", "CL 1A 2 3")]
+    [InlineData("Calle Primera # 2-3", "CL 1 2 3")]
+    [InlineData("Carrera quinta bis # 10-20", "CRA 5 BIS 10 20")]
+    [InlineData("Calle 10 # 1ra - 20", "CL 10 1 20")]
+    public void TryParse_OrdinalRoadNumber_ReadsNumber(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("calle 10 # primera - 20")]
+    [InlineData("calle 10 # 5 - quinta")]
+    public void TryParse_OrdinalWordOutsideMainRoad_ReturnsFalse(string input)
+    {
+        AddressParser.TryParse(input, out _).Should().BeFalse();
+    }
+
+    [Theory]
     [InlineData("calle 59 bis # 80-12", "CL 59 BIS 80 12")]
     [InlineData("calle 59bis # 80-12", "CL 59 BIS 80 12")]
     [InlineData("Calle 59 A Bis # 80-12", "CL 59A BIS 80 12")]
