@@ -23,6 +23,9 @@ internal static class ComplementAbbreviations
         ComplementType.Consultorio => "CS",
         ComplementType.Etapa => "ET",
         ComplementType.Sector => "SC",
+        ComplementType.Edificio => "ED",
+        ComplementType.Barrio => "BR",
+        ComplementType.Urbanizacion => "UR",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown complement type."),
     };
 }

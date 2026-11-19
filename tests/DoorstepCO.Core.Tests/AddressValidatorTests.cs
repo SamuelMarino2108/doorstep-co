@@ -55,7 +55,7 @@ public sealed class AddressValidatorTests
 
     [Theory]
     [InlineData("calle 59 # 80-12 apto 302 frente al parque", "CL 59 80 12 AP 302 FRENTE AL PARQUE")]
-    [InlineData("calle 59 # 80-12 edificio azul", "CL 59 80 12 EDIFICIO AZUL")]
+    [InlineData("calle 59 # 80-12 al lado de la iglesia", "CL 59 80 12 AL LADO DE LA IGLESIA")]
     [InlineData("calle 59 # 80-12 apto", "CL 59 80 12 APTO")]
     public void Validate_TrailingUnrecognizedText_KeepsTextAtTheEndWithUnrecognizedTextIssue(
         string input, string expected)

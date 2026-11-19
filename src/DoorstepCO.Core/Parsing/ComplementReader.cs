@@ -7,8 +7,8 @@ namespace DoorstepCO.Core.Parsing;
 /// Reads the complements that follow the plate number, e.g. "torre 2 apto 302 b". Each complement is a keyword
 /// followed by a value: a number with an optional letter suffix, or a single letter. A letter after the number
 /// that is itself a complement keyword ("t" in "apto 302 t 2") starts the next complement instead.
-/// A conjunto takes a name instead: every word up to the next complement keyword ("los pinos" in
-/// "conjunto los pinos torre 2").
+/// A conjunto, edificio, barrio or urbanización takes a name instead: every word up to the next complement
+/// keyword ("los pinos" in "conjunto los pinos torre 2").
 /// Reading stops at the first token that does not start a complete complement; the caller decides what to do with
 /// the rest.
 /// </summary>
@@ -51,7 +51,7 @@ internal static class ComplementReader
             position++;
         }
 
-        var hasValue = type is ComplementType.Conjunto or ComplementType.ConjuntoResidencial
+        var hasValue = ComplementKeywords.TakesName(type)
             ? TryReadName(tokens, ref position, out var value)
             : TryReadValue(tokens, ref position, out value);
         if (!hasValue)

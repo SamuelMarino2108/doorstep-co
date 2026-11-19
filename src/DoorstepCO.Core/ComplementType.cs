@@ -53,4 +53,13 @@ public enum ComplementType
 
     /// <summary>Sector (SC).</summary>
     Sector,
+
+    /// <summary>Edificio (ED), followed by the building name.</summary>
+    Edificio,
+
+    /// <summary>Barrio (BR), followed by the neighborhood name.</summary>
+    Barrio,
+
+    /// <summary>Urbanización (UR), followed by the urbanization name.</summary>
+    Urbanizacion,
 }

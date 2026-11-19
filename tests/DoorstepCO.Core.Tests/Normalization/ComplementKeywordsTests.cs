@@ -46,6 +46,13 @@ public sealed class ComplementKeywordsTests
     [InlineData("et", ComplementType.Etapa)]
     [InlineData("sector", ComplementType.Sector)]
     [InlineData("sec", ComplementType.Sector)]
+    [InlineData("edificio", ComplementType.Edificio)]
+    [InlineData("edif", ComplementType.Edificio)]
+    [InlineData("ed", ComplementType.Edificio)]
+    [InlineData("barrio", ComplementType.Barrio)]
+    [InlineData("br", ComplementType.Barrio)]
+    [InlineData("urbanizacion", ComplementType.Urbanizacion)]
+    [InlineData("urb", ComplementType.Urbanizacion)]
     public void TryGetComplementType_KnownKeyword_ReturnsType(string keyword, ComplementType expected)
     {
         var found = ComplementKeywords.TryGetComplementType(keyword, out var type);
@@ -67,6 +74,26 @@ public sealed class ComplementKeywordsTests
         var found = ComplementKeywords.TryGetComplementType(keyword, out _);
 
         found.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(ComplementType.Conjunto)]
+    [InlineData(ComplementType.ConjuntoResidencial)]
+    [InlineData(ComplementType.Edificio)]
+    [InlineData(ComplementType.Barrio)]
+    [InlineData(ComplementType.Urbanizacion)]
+    public void TakesName_NamedComplement_ReturnsTrue(ComplementType type)
+    {
+        ComplementKeywords.TakesName(type).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(ComplementType.Apartamento)]
+    [InlineData(ComplementType.Torre)]
+    [InlineData(ComplementType.Oficina)]
+    public void TakesName_UnitComplement_ReturnsFalse(ComplementType type)
+    {
+        ComplementKeywords.TakesName(type).Should().BeFalse();
     }
 
     [Theory]

@@ -75,6 +75,9 @@ public sealed class AddressFormatterTests
     [InlineData(ComplementType.Consultorio, "201", "CL 59 80 12 CS 201")]
     [InlineData(ComplementType.Etapa, "2", "CL 59 80 12 ET 2")]
     [InlineData(ComplementType.Sector, "3", "CL 59 80 12 SC 3")]
+    [InlineData(ComplementType.Edificio, "EL ROBLE", "CL 59 80 12 ED EL ROBLE")]
+    [InlineData(ComplementType.Barrio, "CHAPINERO", "CL 59 80 12 BR CHAPINERO")]
+    [InlineData(ComplementType.Urbanizacion, "LOS PINOS", "CL 59 80 12 UR LOS PINOS")]
     public void Format_AddressWithComplement_AppendsDianAbbreviationAndValue(
         ComplementType type, string value, string expected)
     {

@@ -262,7 +262,11 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 cj villa del río 2", ComplementType.Conjunto, "VILLA DEL RIO 2")]
     [InlineData("calle 59 # 80-12 conjunto residencial los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
     [InlineData("calle 59 # 80-12 conj. res. los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
-    public void TryParse_ConjuntoName_ReturnsNameAsValue(string input, ComplementType type, string value)
+    [InlineData("calle 59 # 80-12 edificio el roble", ComplementType.Edificio, "EL ROBLE")]
+    [InlineData("calle 59 # 80-12 edif. Central", ComplementType.Edificio, "CENTRAL")]
+    [InlineData("calle 59 # 80-12 barrio chapinero", ComplementType.Barrio, "CHAPINERO")]
+    [InlineData("calle 59 # 80-12 urbanización los pinos", ComplementType.Urbanizacion, "LOS PINOS")]
+    public void TryParse_NamedComplement_ReturnsNameAsValue(string input, ComplementType type, string value)
     {
         var parsed = AddressParser.TryParse(input, out var address);
 
@@ -280,6 +284,18 @@ public sealed class AddressParserTests
             new Complement(ComplementType.Conjunto, "LOS PINOS"),
             new Complement(ComplementType.Torre, "2"),
             new Complement(ComplementType.Apartamento, "302"));
+    }
+
+    [Fact]
+    public void TryParse_ApartmentThenBuilding_EndsBuildingNameAtNextKeyword()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 apto 501 edificio central of 3", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Apartamento, "501"),
+            new Complement(ComplementType.Edificio, "CENTRAL"),
+            new Complement(ComplementType.Oficina, "3"));
     }
 
     [Fact]
@@ -377,7 +393,7 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 apto 302 b c", "CL 59 80 12 AP 302B", "c")]
     [InlineData("calle 59 # 80-12 bis", "CL 59 80 12", "bis")]
     [InlineData("calle 59 # 80-12 apto 302 # 5", "CL 59 80 12 AP 302", "# 5")]
-    [InlineData("kr 7 este # 32-16 Edificio Azul", "CRA 7 ESTE 32 16", "edificio azul")]
+    [InlineData("kr 7 este # 32-16 Puerta Azul", "CRA 7 ESTE 32 16", "puerta azul")]
     public void TryParseWithUnrecognized_TrailingText_ReturnsRecognizedPartAndText(
         string input, string expected, string expectedUnrecognized)
     {
