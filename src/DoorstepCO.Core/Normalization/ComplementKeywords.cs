@@ -39,6 +39,30 @@ internal static class ComplementKeywords
         ["conjunto"] = ComplementType.Conjunto,
         ["conj"] = ComplementType.Conjunto,
         ["cj"] = ComplementType.Conjunto,
+
+        ["oficina"] = ComplementType.Oficina,
+        ["ofi"] = ComplementType.Oficina,
+        ["of"] = ComplementType.Oficina,
+
+        ["local"] = ComplementType.Local,
+        ["loc"] = ComplementType.Local,
+        ["lc"] = ComplementType.Local,
+
+        ["piso"] = ComplementType.Piso,
+        ["pi"] = ComplementType.Piso,
+
+        ["bodega"] = ComplementType.Bodega,
+        ["bod"] = ComplementType.Bodega,
+        ["bg"] = ComplementType.Bodega,
+
+        ["consultorio"] = ComplementType.Consultorio,
+        ["cons"] = ComplementType.Consultorio,
+
+        ["etapa"] = ComplementType.Etapa,
+        ["et"] = ComplementType.Etapa,
+
+        ["sector"] = ComplementType.Sector,
+        ["sec"] = ComplementType.Sector,
     };
 
     private static readonly HashSet<string> _residential = new(StringComparer.Ordinal)

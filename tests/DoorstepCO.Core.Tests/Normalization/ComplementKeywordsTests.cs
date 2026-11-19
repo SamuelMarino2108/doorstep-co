@@ -29,6 +29,23 @@ public sealed class ComplementKeywordsTests
     [InlineData("conjunto", ComplementType.Conjunto)]
     [InlineData("conj", ComplementType.Conjunto)]
     [InlineData("cj", ComplementType.Conjunto)]
+    [InlineData("oficina", ComplementType.Oficina)]
+    [InlineData("ofi", ComplementType.Oficina)]
+    [InlineData("of", ComplementType.Oficina)]
+    [InlineData("local", ComplementType.Local)]
+    [InlineData("loc", ComplementType.Local)]
+    [InlineData("lc", ComplementType.Local)]
+    [InlineData("piso", ComplementType.Piso)]
+    [InlineData("pi", ComplementType.Piso)]
+    [InlineData("bodega", ComplementType.Bodega)]
+    [InlineData("bod", ComplementType.Bodega)]
+    [InlineData("bg", ComplementType.Bodega)]
+    [InlineData("consultorio", ComplementType.Consultorio)]
+    [InlineData("cons", ComplementType.Consultorio)]
+    [InlineData("etapa", ComplementType.Etapa)]
+    [InlineData("et", ComplementType.Etapa)]
+    [InlineData("sector", ComplementType.Sector)]
+    [InlineData("sec", ComplementType.Sector)]
     public void TryGetComplementType_KnownKeyword_ReturnsType(string keyword, ComplementType expected)
     {
         var found = ComplementKeywords.TryGetComplementType(keyword, out var type);

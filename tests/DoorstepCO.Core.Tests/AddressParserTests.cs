@@ -227,6 +227,15 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 lt 7", ComplementType.Lote, "7")]
     [InlineData("carrera 7 # 10-20 sur apto 101", ComplementType.Apartamento, "101")]
     [InlineData("calle 59 # 80-12 apto 007", ComplementType.Apartamento, "007")]
+    [InlineData("calle 59 # 80-12 oficina 301", ComplementType.Oficina, "301")]
+    [InlineData("calle 59 # 80-12 of. 301", ComplementType.Oficina, "301")]
+    [InlineData("calle 59 # 80-12 local 5", ComplementType.Local, "5")]
+    [InlineData("calle 59 # 80-12 lc 5a", ComplementType.Local, "5A")]
+    [InlineData("calle 59 # 80-12 piso 3", ComplementType.Piso, "3")]
+    [InlineData("calle 59 # 80-12 bodega 4", ComplementType.Bodega, "4")]
+    [InlineData("calle 59 # 80-12 consultorio 201", ComplementType.Consultorio, "201")]
+    [InlineData("calle 59 # 80-12 etapa 2", ComplementType.Etapa, "2")]
+    [InlineData("calle 59 # 80-12 sector 3", ComplementType.Sector, "3")]
     public void TryParse_SingleComplement_ReturnsTypeAndValue(string input, ComplementType type, string value)
     {
         var parsed = AddressParser.TryParse(input, out var address);

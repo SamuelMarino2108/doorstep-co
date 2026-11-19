@@ -16,6 +16,13 @@ internal static class ComplementAbbreviations
         ComplementType.Lote => "LT",
         ComplementType.Conjunto => "CONJ",
         ComplementType.ConjuntoResidencial => "CON",
+        ComplementType.Oficina => "OF",
+        ComplementType.Local => "LC",
+        ComplementType.Piso => "PI",
+        ComplementType.Bodega => "BG",
+        ComplementType.Consultorio => "CS",
+        ComplementType.Etapa => "ET",
+        ComplementType.Sector => "SC",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown complement type."),
     };
 }

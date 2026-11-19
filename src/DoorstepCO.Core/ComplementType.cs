@@ -32,4 +32,25 @@ public enum ComplementType
 
     /// <summary>Conjunto residencial (CON).</summary>
     ConjuntoResidencial,
+
+    /// <summary>Oficina (OF).</summary>
+    Oficina,
+
+    /// <summary>Local (LC).</summary>
+    Local,
+
+    /// <summary>Piso (PI).</summary>
+    Piso,
+
+    /// <summary>Bodega (BG).</summary>
+    Bodega,
+
+    /// <summary>Consultorio (CS).</summary>
+    Consultorio,
+
+    /// <summary>Etapa (ET).</summary>
+    Etapa,
+
+    /// <summary>Sector (SC).</summary>
+    Sector,
 }
