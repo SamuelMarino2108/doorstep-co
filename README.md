@@ -117,18 +117,26 @@ When the address cannot be parsed, `address` and `normalized` are `null` and `co
 
 Upload a `.csv` or `.xlsx` file (up to 10 MB) as the `file` field of a multipart form. The file needs a
 `DIRECCION` column (case and accents are ignored). The response is the same file, named `<name>-normalizada`,
-with a `NORMALIZADA` column appended; the cell is left empty when the address cannot be parsed. CSV files may be
-separated by commas, semicolons or tabs.
+with three columns appended:
+
+| Column | Content |
+|---|---|
+| `NORMALIZADA` | The normalized address; empty when the address cannot be parsed |
+| `CONFIANZA` | The confidence score, from `0.00` to `1.00` |
+| `PROBLEMAS` | The issue messages, separated by `; `; empty when there are none |
+
+Rows with a blank address keep the three cells empty. CSV files may be separated by commas, semicolons or tabs.
 
 ```bash
 curl -F "file=@samples/direcciones.csv" http://localhost:5132/normalize/batch -o direcciones-normalizada.csv
 ```
 
 ```
-PEDIDO;DIRECCION;CIUDAD;NORMALIZADA
-1001;cll 59 a bis sur # 80-12 apto 302;Bogotá;CL 59A BIS SUR 80 12 AP 302
-1002;Cra 7 No. 10-20 Torre 2 Apto 501;Bogotá;CRA 7 10 20 TO 2 AP 501
-1003;Av. Calle 26 # 68B-31;Bogotá;AC 26 68B 31
+PEDIDO;DIRECCION;CIUDAD;NORMALIZADA;CONFIANZA;PROBLEMAS
+1001;cll 59 a bis sur # 80-12 apto 302;Bogotá;CL 59A BIS SUR 80 12 AP 302;1.00;
+1006;cl 10 # 5-51 frente al parque;Barranquilla;CL 10 5 51 FRENTE AL PARQUE;0.70;"Text after the address was not recognized and was kept as remarks. ""frente al parque"""
+1008;cra 15 # 0-45;Bucaramanga;CRA 15 0 45;0.60;The road, crossing road or plate number is 0.
+1010;mz 4 casa 12;Cartagena;;0.00;The address could not be recognized as an urban address.
 ```
 
 Errors are returned as `400 Bad Request` problem details with a `code`: `EmptyFile`, `MissingAddressColumn`,
