@@ -8,7 +8,7 @@
     <Authors>Samuel Marino</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>colombia;address;parser;normalization;logistics</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/SamuelMarino2108/doorstep-co</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SamuelMarino2108/doorstep-co</RepositoryUrl>
