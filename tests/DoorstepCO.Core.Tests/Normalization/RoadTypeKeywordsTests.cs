@@ -21,6 +21,16 @@ public sealed class RoadTypeKeywordsTests
     [InlineData("ave", RoadType.Avenida)]
     [InlineData("ac", RoadType.AvenidaCalle)]
     [InlineData("ak", RoadType.AvenidaCarrera)]
+    [InlineData("k", RoadType.Carrera)]
+    [InlineData("autopista", RoadType.Autopista)]
+    [InlineData("autop", RoadType.Autopista)]
+    [InlineData("au", RoadType.Autopista)]
+    [InlineData("circular", RoadType.Circular)]
+    [InlineData("circ", RoadType.Circular)]
+    [InlineData("cq", RoadType.Circular)]
+    [InlineData("circunvalar", RoadType.Circunvalar)]
+    [InlineData("circunv", RoadType.Circunvalar)]
+    [InlineData("cv", RoadType.Circunvalar)]
     public void TryGetRoadType_KnownKeyword_ReturnsRoadType(string keyword, RoadType expected)
     {
         var found = RoadTypeKeywords.TryGetRoadType(keyword, out var roadType);

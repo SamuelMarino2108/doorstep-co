@@ -19,6 +19,7 @@ internal static class RoadTypeKeywords
         ["kr"] = RoadType.Carrera,
         ["cr"] = RoadType.Carrera,
         ["carr"] = RoadType.Carrera,
+        ["k"] = RoadType.Carrera,
 
         ["diagonal"] = RoadType.Diagonal,
         ["diag"] = RoadType.Diagonal,
@@ -38,7 +39,26 @@ internal static class RoadTypeKeywords
 
         ["ac"] = RoadType.AvenidaCalle,
         ["ak"] = RoadType.AvenidaCarrera,
+
+        ["autopista"] = RoadType.Autopista,
+        ["autop"] = RoadType.Autopista,
+        ["au"] = RoadType.Autopista,
+
+        ["circular"] = RoadType.Circular,
+        ["circ"] = RoadType.Circular,
+        ["cq"] = RoadType.Circular,
+
+        ["circunvalar"] = RoadType.Circunvalar,
+        ["circunv"] = RoadType.Circunvalar,
+        ["cv"] = RoadType.Circunvalar,
     };
+
+    private static readonly HashSet<RoadType> _named =
+    [
+        RoadType.Avenida,
+        RoadType.Autopista,
+        RoadType.Circunvalar,
+    ];
 
     private static readonly Dictionary<(RoadType First, RoadType Second), RoadType> _compounds = new()
     {
@@ -48,6 +68,8 @@ internal static class RoadTypeKeywords
 
     public static bool TryGetRoadType(string keyword, out RoadType roadType) =>
         _keywords.TryGetValue(keyword, out roadType);
+
+    public static bool CanBeNamed(RoadType roadType) => _named.Contains(roadType);
 
     public static bool TryCombine(RoadType first, RoadType second, out RoadType compound) =>
         _compounds.TryGetValue((first, second), out compound);

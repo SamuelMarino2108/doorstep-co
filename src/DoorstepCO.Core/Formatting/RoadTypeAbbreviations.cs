@@ -14,6 +14,9 @@ internal static class RoadTypeAbbreviations
         RoadType.Avenida => "AV",
         RoadType.AvenidaCalle => "AC",
         RoadType.AvenidaCarrera => "AK",
+        RoadType.Autopista => "AU",
+        RoadType.Circular => "CQ",
+        RoadType.Circunvalar => "CV",
         _ => throw new ArgumentOutOfRangeException(nameof(roadType), roadType, "Unknown road type."),
     };
 }

@@ -130,7 +130,7 @@ public static class AddressParser
             return true;
         }
 
-        if (roadType != RoadType.Avenida)
+        if (!RoadTypeKeywords.CanBeNamed(roadType))
         {
             return TryReadOrdinalRoad(tokens, ref position, out road);
         }
@@ -141,7 +141,7 @@ public static class AddressParser
             return false;
         }
 
-        if (!NamedAvenues.TryGetRoad(name, out var namedType, out var namedRoad))
+        if (roadType != RoadType.Avenida || !NamedAvenues.TryGetRoad(name, out var namedType, out var namedRoad))
         {
             road = new RoadNumber(0, Name: name.ToUpperInvariant());
             return true;
@@ -171,10 +171,14 @@ public static class AddressParser
         return true;
     }
 
+    /// <summary>
+    /// Reads the name of a road designated by name. A quadrant word ends the name, except as its first word, where
+    /// it is the name itself ("autopista sur", "autopista norte").
+    /// </summary>
     private static string ReadName(IReadOnlyList<string> tokens, ref int position)
     {
         var words = new List<string>();
-        while (position < tokens.Count && IsNameWord(tokens[position]))
+        while (position < tokens.Count && IsNameWord(tokens[position], isFirst: words.Count == 0))
         {
             words.Add(tokens[position]);
             position++;
@@ -183,11 +187,13 @@ public static class AddressParser
         return string.Join(' ', words);
     }
 
-    private static bool IsNameWord(string token) =>
+    private static bool IsNameWord(string token, bool isFirst) =>
         char.IsLetter(token[0])
         && !PlateSeparatorKeywords.IsPlateSeparator(token)
-        && !QuadrantKeywords.TryGetQuadrant(token, out _)
-        && !ImplicitQuadrantKeywords.IsImplicitQuadrant(token);
+        && ((isFirst && token.Length > 1) || !IsQuadrantWord(token));
+
+    private static bool IsQuadrantWord(string token) =>
+        QuadrantKeywords.TryGetQuadrant(token, out _) || ImplicitQuadrantKeywords.IsImplicitQuadrant(token);
 
     private static bool TryReadRoadNumber(
         IReadOnlyList<string> tokens,

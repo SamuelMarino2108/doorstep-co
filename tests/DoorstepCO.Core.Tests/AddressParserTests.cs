@@ -57,6 +57,11 @@ public sealed class AddressParserTests
     [InlineData("Ave 68 # 13-45", "AV 68 13 45")]
     [InlineData("AC 26 # 50-01", "AC 26 50 1")]
     [InlineData("ak 15 # 100-20", "AK 15 100 20")]
+    [InlineData("K 7 # 10-20", "CRA 7 10 20")]
+    [InlineData("Circular 1 # 70-50", "CQ 1 70 50")]
+    [InlineData("circ. 3 # 66b-20", "CQ 3 66B 20")]
+    [InlineData("Autopista 45 # 128-50", "AU 45 128 50")]
+    [InlineData("Circunvalar 5 # 20-30", "CV 5 20 30")]
     public void TryParse_KeywordAndSeparatorVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -568,6 +573,11 @@ public sealed class AddressParserTests
     [Theory]
     [InlineData("av el poblado sur # 30-28 apto 302", "AV EL POBLADO SUR 30 28 AP 302")]
     [InlineData("Av. Américas # 68-20", "AV AMERICAS 68 20")]
+    [InlineData("Autopista Norte # 128-50", "AU NORTE 128 50")]
+    [InlineData("autopista sur # 50-10", "AU SUR 50 10")]
+    [InlineData("Autopista Medellín # 10-20", "AU MEDELLIN 10 20")]
+    [InlineData("Avenida Circunvalar # 20-30", "AV CIRCUNVALAR 20 30")]
+    [InlineData("Circunvalar El Poblado # 20-30", "CV EL POBLADO 20 30")]
     public void TryParse_UnknownNamedAvenue_FormatsWithName(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -581,6 +591,8 @@ public sealed class AddressParserTests
     [InlineData("av el poblado")]
     [InlineData("av el poblado # 30")]
     [InlineData("calle real # 30-28")]
+    [InlineData("circular real # 30-28")]
+    [InlineData("autopista # 30-28")]
     [InlineData("av calle real # 30-28")]
     public void TryParse_InvalidNamedRoad_ReturnsFalse(string input)
     {
