@@ -6,4 +6,5 @@ namespace DoorstepCO.Core.Validation;
 internal static class AddressLimits
 {
     public const int MaxPlateNumber = 250;
+    public const int MaxRoadNumber = 300;
 }

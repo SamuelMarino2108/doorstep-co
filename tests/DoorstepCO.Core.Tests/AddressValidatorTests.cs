@@ -199,6 +199,28 @@ public sealed class AddressValidatorTests
         AddressValidator.Validate(input).Issues.Should().BeEmpty();
     }
 
+    [Theory]
+    [InlineData("calle 301 # 80-12")]
+    [InlineData("calle 80 # 1000-12")]
+    [InlineData("calle 500 # 400-12")]
+    public void Validate_RoadOrCrossAbove300_ReturnsSingleRoadNumberOutOfRangeIssue(string input)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Address.Should().NotBeNull();
+        result.Confidence.Should().Be(0.7);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.RoadNumberOutOfRange);
+    }
+
+    [Theory]
+    [InlineData("calle 300 # 300-12")]
+    [InlineData("av el poblado # 300-12")]
+    public void Validate_RoadAndCrossUpTo300_ReturnsNoRoadNumberOutOfRangeIssue(string input)
+    {
+        AddressValidator.Validate(input).Issues.Select(issue => issue.Code)
+            .Should().NotContain(IssueCode.RoadNumberOutOfRange);
+    }
+
     [Fact]
     public void Validate_SeveralIssues_AddsUpPenalties()
     {

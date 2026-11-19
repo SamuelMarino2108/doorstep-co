@@ -57,6 +57,11 @@ public static class AddressValidator
             issues.Add(Issue(IssueCode.ZeroNumber));
         }
 
+        if (address.Road.Number > AddressLimits.MaxRoadNumber || address.Cross.Number > AddressLimits.MaxRoadNumber)
+        {
+            issues.Add(Issue(IssueCode.RoadNumberOutOfRange));
+        }
+
         if (address.PlateNumber > AddressLimits.MaxPlateNumber)
         {
             issues.Add(Issue(IssueCode.PlateNumberOutOfRange));
