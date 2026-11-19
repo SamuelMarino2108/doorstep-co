@@ -3,10 +3,13 @@ namespace DoorstepCO.Core;
 /// <summary>
 /// Outcome of validating a free-text address.
 /// </summary>
-/// <param name="Address">The parsed address, or <see langword="null"/> when the input could not be parsed.</param>
+/// <param name="Address">
+/// The parsed address, or <see langword="null"/> when the input could not be parsed as an urban address.
+/// </param>
 /// <param name="Normalized">
-/// The standard text form of the address (see <see cref="AddressFormatter.Format"/>), or <see langword="null"/>
-/// when the input could not be parsed.
+/// The standard text form of the address (see <see cref="AddressFormatter.Format"/>). For a non-standard address
+/// made only of complements it holds the complements ("MZ 4 CA 12") while <paramref name="Address"/> is
+/// <see langword="null"/>. It is <see langword="null"/> when nothing could be recognized.
 /// </param>
 /// <param name="Confidence">
 /// How likely the address is deliverable as written, from 0.0 (unusable) to 1.0 (no issues found).
