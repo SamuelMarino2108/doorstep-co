@@ -5,4 +5,7 @@ namespace DoorstepCO.Core.Parsing;
 /// </summary>
 /// <param name="Address">The recognized part of the address.</param>
 /// <param name="UnrecognizedText">The normalized tokens left over after the address, separated by spaces.</param>
-internal sealed record ParseOutcome(Address Address, string UnrecognizedText);
+/// <param name="MisspelledRoadType">
+/// The road type word as written when it was a corrected typo ("carrerra"), or <see langword="null"/>.
+/// </param>
+internal sealed record ParseOutcome(Address Address, string UnrecognizedText, string? MisspelledRoadType = null);

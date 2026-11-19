@@ -40,7 +40,8 @@ public static class AddressParser
 
         var quadrants = new List<(Quadrant Quadrant, bool WrittenOnRoad)>();
 
-        if (!TryReadRoadType(tokens, ref position, out var roadType)
+        string? misspelledRoadType = null;
+        if (!TryReadRoadType(tokens, ref position, out var roadType, ref misspelledRoadType)
             || !TryReadRoad(tokens, ref position, ref roadType, quadrants, out var road))
         {
             return null;
@@ -80,7 +81,7 @@ public static class AddressParser
         {
             Complements = complements,
         };
-        return new ParseOutcome(address, unrecognizedText);
+        return new ParseOutcome(address, unrecognizedText, misspelledRoadType);
     }
 
     private static int LocationSuffixStart(IReadOnlyList<string> tokens, int start)
@@ -96,23 +97,51 @@ public static class AddressParser
         return tokens.Count;
     }
 
-    private static bool TryReadRoadType(IReadOnlyList<string> tokens, ref int position, out RoadType roadType)
+    private static bool TryReadRoadType(
+        IReadOnlyList<string> tokens, ref int position, out RoadType roadType, ref string? misspelled)
     {
-        roadType = default;
-        if (position >= tokens.Count || !RoadTypeKeywords.TryGetRoadType(tokens[position], out roadType))
+        if (!TryMatchRoadType(tokens, position, out roadType, ref misspelled))
         {
             return false;
         }
 
         position++;
-        if (position < tokens.Count
-            && RoadTypeKeywords.TryGetRoadType(tokens[position], out var second)
+        var secondMisspelled = misspelled;
+        if (TryMatchRoadType(tokens, position, out var second, ref secondMisspelled)
             && RoadTypeKeywords.TryCombine(roadType, second, out var compound))
         {
             roadType = compound;
+            misspelled = secondMisspelled;
             position++;
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Matches the token at <paramref name="position"/> to a road type, exactly or as a corrected typo. A typo
+    /// sets <paramref name="misspelled"/> to the word as written.
+    /// </summary>
+    private static bool TryMatchRoadType(
+        IReadOnlyList<string> tokens, int position, out RoadType roadType, ref string? misspelled)
+    {
+        roadType = default;
+        if (position >= tokens.Count)
+        {
+            return false;
+        }
+
+        if (RoadTypeKeywords.TryGetRoadType(tokens[position], out roadType))
+        {
+            return true;
+        }
+
+        if (!RoadTypeKeywords.TryCorrectRoadType(tokens[position], out roadType))
+        {
+            return false;
+        }
+
+        misspelled = tokens[position];
         return true;
     }
 

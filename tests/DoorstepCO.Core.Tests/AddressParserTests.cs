@@ -140,6 +140,25 @@ public sealed class AddressParserTests
     }
 
     [Theory]
+    [InlineData("Carrerra 7 # 10-20", "CRA 7 10 20", "carrerra")]
+    [InlineData("calel 59 # 80-12", "CL 59 80 12", "calel")]
+    [InlineData("Avenda Carrera 68 # 22-10", "AK 68 22 10", "avenda")]
+    [InlineData("Avenida Carerra 68 # 22-10", "AK 68 22 10", "carerra")]
+    public void Parse_MisspelledRoadType_CorrectsAndReportsWord(string input, string expected, string misspelled)
+    {
+        var outcome = AddressParser.Parse(input);
+
+        AddressFormatter.Format(outcome!.Address).Should().Be(expected);
+        outcome.MisspelledRoadType.Should().Be(misspelled);
+    }
+
+    [Fact]
+    public void Parse_CorrectlySpelledRoadType_ReportsNoMisspelling()
+    {
+        AddressParser.Parse("carrera 7 # 10-20")!.MisspelledRoadType.Should().BeNull();
+    }
+
+    [Theory]
     [InlineData("calle 59 80-a-12")]
     [InlineData("calle 59-80-12")]
     public void TryParse_DashOutsideMainRoadLetter_ReturnsFalse(string input)

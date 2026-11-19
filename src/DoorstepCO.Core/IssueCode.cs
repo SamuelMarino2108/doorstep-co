@@ -39,4 +39,9 @@ public enum IssueCode
     /// "Calle 59 # 80-12 apto". The text is kept as remarks.
     /// </summary>
     IncompleteComplement,
+
+    /// <summary>
+    /// The road type was misspelled and corrected, e.g. "carrerra" read as carrera in "Carrerra 7 # 10-20".
+    /// </summary>
+    CorrectedTypo,
 }
