@@ -5,7 +5,9 @@ namespace DoorstepCO.Core.Parsing;
 
 /// <summary>
 /// Reads the complements that follow the plate number, e.g. "torre 2 apto 302 b". Each complement is a keyword
-/// followed by a value: a number with an optional letter suffix, or a single letter. A letter after the number
+/// followed by a value: a number with an optional letter suffix, or a single letter. The value may be preceded by
+/// a plate separator or a dash ("apto #302", "ap-302"), and complements may be separated by a dash
+/// ("apto 302 - torre 4"). A letter after the number
 /// that is itself a complement keyword ("t" in "apto 302 t 2") starts the next complement instead.
 /// A conjunto, edificio, barrio or urbanización takes a name instead: every word up to the next complement
 /// keyword ("los pinos" in "conjunto los pinos torre 2").
@@ -20,7 +22,12 @@ internal static class ComplementReader
         while (position < tokens.Count)
         {
             var start = position;
-            if (!TryReadOne(tokens, ref position, out var complement))
+            if (read.Count > 0 && tokens[position] == AddressTokenizer.Dash)
+            {
+                position++;
+            }
+
+            if (position >= tokens.Count || !TryReadOne(tokens, ref position, out var complement))
             {
                 position = start;
                 break;
@@ -71,6 +78,11 @@ internal static class ComplementReader
             return false;
         }
 
+        if (IsValueSeparator(tokens[position]) && position + 1 < tokens.Count)
+        {
+            position++;
+        }
+
         var token = tokens[position];
         if (IsLetter(token))
         {
@@ -111,6 +123,9 @@ internal static class ComplementReader
         name = string.Join(' ', words);
         return words.Count > 0;
     }
+
+    private static bool IsValueSeparator(string token) =>
+        token == AddressTokenizer.Dash || PlateSeparatorKeywords.IsPlateSeparator(token);
 
     private static bool IsWord(string token) => token.Length > 0 && token.All(char.IsAsciiLetterOrDigit);
 

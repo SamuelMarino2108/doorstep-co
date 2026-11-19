@@ -236,6 +236,13 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 consultorio 201", ComplementType.Consultorio, "201")]
     [InlineData("calle 59 # 80-12 etapa 2", ComplementType.Etapa, "2")]
     [InlineData("calle 59 # 80-12 sector 3", ComplementType.Sector, "3")]
+    [InlineData("calle 59 # 80-12 apto #302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto # 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto no 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto No. 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 Ap-302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 casa - b", ComplementType.Casa, "B")]
+    [InlineData("calle 59 # 80-12 torre n", ComplementType.Torre, "N")]
     public void TryParse_SingleComplement_ReturnsTypeAndValue(string input, ComplementType type, string value)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -296,6 +303,26 @@ public sealed class AddressParserTests
             new Complement(ComplementType.Apartamento, "501"),
             new Complement(ComplementType.Edificio, "CENTRAL"),
             new Complement(ComplementType.Oficina, "3"));
+    }
+
+    [Fact]
+    public void TryParse_DashBetweenComplements_ReadsBothComplements()
+    {
+        var parsed = AddressParser.TryParse("cra 7 #10-20 apt 302 - torre 4", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Apartamento, "302"),
+            new Complement(ComplementType.Torre, "4"));
+    }
+
+    [Fact]
+    public void TryParseWithUnrecognized_TrailingDash_KeepsDashAsUnrecognized()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 apto 302 -", out _, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        unrecognizedText.Should().Be("-");
     }
 
     [Fact]
