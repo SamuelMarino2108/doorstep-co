@@ -18,13 +18,22 @@ Parsing is deterministic and rule-based: no AI, no external services, no depende
 
 | Feature | Examples |
 |---|---|
-| Road types and their variants | calle, cll, cl, carrera, cra, kr, diagonal, dg, transversal, tv, avenida, av |
+| Road types and their variants | calle, cll, cl, carrera, cra, kr, k, diagonal, dg, transversal, tv, avenida, av, autopista, circular, circunvalar |
+| Misspelled road types | `carrerra 7 # 10-20` → `CRA 7 10 20`, flagged `CorrectedTypo` |
 | Compound avenues | `avenida calle 26` → `AC 26`, `av. carrera 68` → `AK 68` |
 | Named avenues | `av boyacá # 80-12` → `AK 72 80 12` |
-| Letters, BIS and quadrants | `59 a bis`, `68B`, `sur`, `este` |
+| Letters and BIS | `59 a bis`, `68B`, `59-a`, two letters as in Medellín: `44AE`, `33AA` |
+| Ordinal road numbers | `calle 1ra`, `calle 2da`, `calle primera` |
+| Quadrants | `sur` always qualifies the calle and `este` the carrera; `norte` is implicit and dropped |
 | Plate separators | `#`, `no.`, `nro`, `numero` |
-| Complements | apartamento, torre, interior, bloque, casa, manzana, lote, conjunto |
+| Complements | apartamento, torre, interior, bloque, casa, manzana, lote, oficina, local, piso, bodega, consultorio, etapa, sector |
+| Named complements | conjunto, edificio, barrio, urbanización: `edificio el roble` → `ED EL ROBLE` |
+| Trailing city or department | `cra 7 # 10-20, Bogotá D.C.` → `CRA 7 10 20` |
+| Complement-only addresses | `mz 4 casa 12` → `MZ 4 CA 12`, flagged as non-standard |
 | Rural addresses | vereda, finca, km... flagged as non-standard |
+
+Single `S` and `E` letters after a number are read as Sur and Este, following the nomenclature of Bogotá and
+Medellín. Cali's `Norte` and `Oeste` sectors are not supported yet.
 
 ## Library
 
@@ -50,10 +59,16 @@ result.Address;     // RoadType, Road, Cross, PlateNumber, Complements and Remar
 | `Empty` | The input is blank | 1.0 |
 | `Unparseable` | The input is not an urban address | 1.0 |
 | `RuralAddress` | Rural keywords such as vereda, finca or km (non-standard) | 0.8 |
+| `NonStandardAddress` | No road, only complements, e.g. `mz 4 casa 12` | 0.8 |
 | `ZeroNumber` | The road, crossing road or plate number is 0 | 0.4 |
 | `UnrecognizedText` | Trailing text was not recognized; it is kept at the end of `Normalized` | 0.3 |
-| `PlateNumberOutOfRange` | The plate number is greater than 150 | 0.3 |
+| `IncompleteComplement` | A complement has no value, e.g. `... apto`; the text is kept at the end of `Normalized` | 0.3 |
+| `RoadNumberOutOfRange` | The road or crossing road number is greater than 300 | 0.3 |
+| `PlateNumberOutOfRange` | The plate number is greater than 250 | 0.3 |
 | `NamedRoad` | The road is a name that could not be matched to its number, e.g. `av jimenez` | 0.2 |
+| `CorrectedTypo` | The road type was misspelled and corrected, e.g. `carrerra` | 0.1 |
+
+Plate numbers are written with at least two digits: `calle 10 # 4-5` → `CL 10 4 05`.
 
 ## HTTP API
 
@@ -111,7 +126,8 @@ curl -X POST http://localhost:5132/normalize \
 }
 ```
 
-When the address cannot be parsed, `address` and `normalized` are `null` and `confidence` is `0`.
+When the address cannot be parsed, `address` and `normalized` are `null` and `confidence` is `0`. When it is
+made only of complements, `address` is `null` and `normalized` holds the complements (`"MZ 4 CA 12"`).
 
 ### `POST /normalize/batch`
 
@@ -121,7 +137,7 @@ with three columns appended:
 
 | Column | Content |
 |---|---|
-| `NORMALIZADA` | The normalized address; empty when the address cannot be parsed |
+| `NORMALIZADA` | The normalized address; empty when nothing could be recognized |
 | `CONFIANZA` | The confidence score, from `0.00` to `1.00` |
 | `PROBLEMAS` | The issue messages, separated by `; `; empty when there are none |
 
@@ -135,8 +151,9 @@ curl -F "file=@samples/direcciones.csv" http://localhost:5132/normalize/batch -o
 PEDIDO;DIRECCION;CIUDAD;NORMALIZADA;CONFIANZA;PROBLEMAS
 1001;cll 59 a bis sur # 80-12 apto 302;Bogotá;CL 59A BIS SUR 80 12 AP 302;1.00;
 1006;cl 10 # 5-51 frente al parque;Barranquilla;CL 10 5 51 FRENTE AL PARQUE;0.70;"Text after the address was not recognized and was kept as remarks. ""frente al parque"""
+1007;vereda el salitre finca la esperanza;Chía;;0.00;"The address looks rural and does not follow the standard urban nomenclature.; The address could not be recognized as an urban address."
 1008;cra 15 # 0-45;Bucaramanga;CRA 15 0 45;0.60;The road, crossing road or plate number is 0.
-1010;mz 4 casa 12;Cartagena;;0.00;The address could not be recognized as an urban address.
+1010;mz 4 casa 12;Cartagena;MZ 4 CA 12;0.20;The address has no road, only complements, and does not follow the standard urban nomenclature.
 ```
 
 Errors are returned as `400 Bad Request` problem details with a `code`: `EmptyFile`, `MissingAddressColumn`,
@@ -150,7 +167,16 @@ dotnet test
 dotnet format --verify-no-changes
 ```
 
-Pushing a `v*` tag (for example `v0.1.0`) publishes `DoorstepCO.Core` to NuGet with that version.
+Pushing a `v*` tag (for example `v0.2.0`) publishes `DoorstepCO.Core` to NuGet with that version.
+
+## Breaking changes in 0.2.0
+
+- `RoadNumber.Letter` is a `string?` instead of a `char?`, to hold two letters (`"AE"`).
+- `Address.Remarks` holds unrecognized trailing text, and `AddressFormatter.Format` appends it, so
+  `Normalized` keeps it instead of dropping it.
+- `ValidationResult.Normalized` is not `null` for complement-only addresses even though `Address` is.
+- Plate numbers are formatted with at least two digits (`4 05` instead of `4 5`).
+- The batch output has `CONFIANZA` and `PROBLEMAS` columns after `NORMALIZADA`.
 
 ## License
 
