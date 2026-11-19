@@ -39,7 +39,50 @@ internal static class ComplementKeywords
         ["conjunto"] = ComplementType.Conjunto,
         ["conj"] = ComplementType.Conjunto,
         ["cj"] = ComplementType.Conjunto,
+
+        ["oficina"] = ComplementType.Oficina,
+        ["ofi"] = ComplementType.Oficina,
+        ["of"] = ComplementType.Oficina,
+
+        ["local"] = ComplementType.Local,
+        ["loc"] = ComplementType.Local,
+        ["lc"] = ComplementType.Local,
+
+        ["piso"] = ComplementType.Piso,
+        ["pi"] = ComplementType.Piso,
+
+        ["bodega"] = ComplementType.Bodega,
+        ["bod"] = ComplementType.Bodega,
+        ["bg"] = ComplementType.Bodega,
+
+        ["consultorio"] = ComplementType.Consultorio,
+        ["cons"] = ComplementType.Consultorio,
+
+        ["etapa"] = ComplementType.Etapa,
+        ["et"] = ComplementType.Etapa,
+
+        ["sector"] = ComplementType.Sector,
+        ["sec"] = ComplementType.Sector,
+
+        ["edificio"] = ComplementType.Edificio,
+        ["edif"] = ComplementType.Edificio,
+        ["ed"] = ComplementType.Edificio,
+
+        ["barrio"] = ComplementType.Barrio,
+        ["br"] = ComplementType.Barrio,
+
+        ["urbanizacion"] = ComplementType.Urbanizacion,
+        ["urb"] = ComplementType.Urbanizacion,
     };
+
+    private static readonly HashSet<ComplementType> _named =
+    [
+        ComplementType.Conjunto,
+        ComplementType.ConjuntoResidencial,
+        ComplementType.Edificio,
+        ComplementType.Barrio,
+        ComplementType.Urbanizacion,
+    ];
 
     private static readonly HashSet<string> _residential = new(StringComparer.Ordinal)
     {
@@ -54,4 +97,6 @@ internal static class ComplementKeywords
     /// Whether the keyword turns a preceding "conjunto" into a conjunto residencial.
     /// </summary>
     public static bool IsResidential(string keyword) => _residential.Contains(keyword);
+
+    public static bool TakesName(ComplementType type) => _named.Contains(type);
 }

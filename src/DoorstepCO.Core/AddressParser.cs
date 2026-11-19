@@ -73,7 +73,7 @@ public static class AddressParser
             return false;
         }
 
-        unrecognizedText = string.Join(' ', tokens.Skip(stop));
+        unrecognizedText = string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
         address = new Address(
             roadType,
             road with { Quadrant = roadQuadrant },
@@ -83,6 +83,19 @@ public static class AddressParser
             Complements = complements,
         };
         return true;
+    }
+
+    private static int LocationSuffixStart(IReadOnlyList<string> tokens, int start)
+    {
+        for (var position = start; position < tokens.Count; position++)
+        {
+            if (LocationKeywords.IsLocationSuffix(tokens, position))
+            {
+                return position;
+            }
+        }
+
+        return tokens.Count;
     }
 
     private static bool TryReadRoadType(IReadOnlyList<string> tokens, ref int position, out RoadType roadType)

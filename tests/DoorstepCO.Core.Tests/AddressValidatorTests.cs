@@ -55,8 +55,7 @@ public sealed class AddressValidatorTests
 
     [Theory]
     [InlineData("calle 59 # 80-12 apto 302 frente al parque", "CL 59 80 12 AP 302 FRENTE AL PARQUE")]
-    [InlineData("calle 59 # 80-12 edificio azul", "CL 59 80 12 EDIFICIO AZUL")]
-    [InlineData("calle 59 # 80-12 apto", "CL 59 80 12 APTO")]
+    [InlineData("calle 59 # 80-12 al lado de la iglesia", "CL 59 80 12 AL LADO DE LA IGLESIA")]
     public void Validate_TrailingUnrecognizedText_KeepsTextAtTheEndWithUnrecognizedTextIssue(
         string input, string expected)
     {
@@ -73,6 +72,31 @@ public sealed class AddressValidatorTests
         var result = AddressValidator.Validate("calle 59 # 80-12 frente al parque");
 
         result.Issues.Single().Message.Should().Contain("\"frente al parque\"");
+    }
+
+    [Theory]
+    [InlineData("calle 59 # 80-12 apto", "CL 59 80 12 APTO", "\"apto\"")]
+    [InlineData("calle 59 # 80-12 torre 2 apto", "CL 59 80 12 TO 2 APTO", "\"apto\"")]
+    [InlineData("calle 59 # 80-12 torre azul", "CL 59 80 12 TORRE AZUL", "\"torre azul\"")]
+    public void Validate_ComplementWithoutValue_ReturnsIncompleteComplementIssue(
+        string input, string expected, string expectedDetail)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Normalized.Should().Be(expected);
+        result.Confidence.Should().Be(0.7);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.IncompleteComplement);
+        result.Issues.Single().Message.Should().Contain(expectedDetail);
+    }
+
+    [Fact]
+    public void Validate_TrailingCity_ReturnsNoIssues()
+    {
+        var result = AddressValidator.Validate("Cra 7 # 10-20 apto 501, Bogotá D.C.");
+
+        result.Normalized.Should().Be("CRA 7 10 20 AP 501");
+        result.Confidence.Should().Be(1.0);
+        result.Issues.Should().BeEmpty();
     }
 
     [Fact]

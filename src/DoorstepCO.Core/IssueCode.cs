@@ -33,4 +33,10 @@ public enum IssueCode
     /// "Av. El Poblado # 30-28".
     /// </summary>
     NamedRoad,
+
+    /// <summary>
+    /// A complement keyword has no value or its value was not recognized, e.g. "apto" in
+    /// "Calle 59 # 80-12 apto". The text is kept as remarks.
+    /// </summary>
+    IncompleteComplement,
 }

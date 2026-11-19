@@ -14,6 +14,8 @@ internal static class IssueMessages
         IssueCode.ZeroNumber => "The road, crossing road or plate number is 0.",
         IssueCode.PlateNumberOutOfRange => $"The plate number is greater than {AddressLimits.MaxPlateNumber}.",
         IssueCode.NamedRoad => "The main road is designated by a name that could not be matched to its standard number.",
+        IssueCode.IncompleteComplement =>
+            "A complement has no value or its value was not recognized; the text was kept as remarks.",
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
 

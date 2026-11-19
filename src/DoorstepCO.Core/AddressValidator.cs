@@ -38,8 +38,10 @@ public static class AddressValidator
 
         if (unrecognizedText.Length > 0)
         {
-            issues.Add(new AddressIssue(
-                IssueCode.UnrecognizedText, IssueMessages.For(IssueCode.UnrecognizedText, unrecognizedText)));
+            var code = StartsWithComplementKeyword(unrecognizedText)
+                ? IssueCode.IncompleteComplement
+                : IssueCode.UnrecognizedText;
+            issues.Add(new AddressIssue(code, IssueMessages.For(code, unrecognizedText)));
             address = address with { Remarks = unrecognizedText.ToUpperInvariant() };
         }
 
@@ -61,6 +63,9 @@ public static class AddressValidator
 
         return Result(address, issues);
     }
+
+    private static bool StartsWithComplementKeyword(string text) =>
+        ComplementKeywords.TryGetComplementType(text.Split(' ')[0], out _);
 
     private static AddressIssue Issue(IssueCode code) => new(code, IssueMessages.For(code));
 

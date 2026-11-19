@@ -227,6 +227,22 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 lt 7", ComplementType.Lote, "7")]
     [InlineData("carrera 7 # 10-20 sur apto 101", ComplementType.Apartamento, "101")]
     [InlineData("calle 59 # 80-12 apto 007", ComplementType.Apartamento, "007")]
+    [InlineData("calle 59 # 80-12 oficina 301", ComplementType.Oficina, "301")]
+    [InlineData("calle 59 # 80-12 of. 301", ComplementType.Oficina, "301")]
+    [InlineData("calle 59 # 80-12 local 5", ComplementType.Local, "5")]
+    [InlineData("calle 59 # 80-12 lc 5a", ComplementType.Local, "5A")]
+    [InlineData("calle 59 # 80-12 piso 3", ComplementType.Piso, "3")]
+    [InlineData("calle 59 # 80-12 bodega 4", ComplementType.Bodega, "4")]
+    [InlineData("calle 59 # 80-12 consultorio 201", ComplementType.Consultorio, "201")]
+    [InlineData("calle 59 # 80-12 etapa 2", ComplementType.Etapa, "2")]
+    [InlineData("calle 59 # 80-12 sector 3", ComplementType.Sector, "3")]
+    [InlineData("calle 59 # 80-12 apto #302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto # 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto no 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 apto No. 302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 Ap-302", ComplementType.Apartamento, "302")]
+    [InlineData("calle 59 # 80-12 casa - b", ComplementType.Casa, "B")]
+    [InlineData("calle 59 # 80-12 torre n", ComplementType.Torre, "N")]
     public void TryParse_SingleComplement_ReturnsTypeAndValue(string input, ComplementType type, string value)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -253,7 +269,11 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 cj villa del río 2", ComplementType.Conjunto, "VILLA DEL RIO 2")]
     [InlineData("calle 59 # 80-12 conjunto residencial los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
     [InlineData("calle 59 # 80-12 conj. res. los pinos", ComplementType.ConjuntoResidencial, "LOS PINOS")]
-    public void TryParse_ConjuntoName_ReturnsNameAsValue(string input, ComplementType type, string value)
+    [InlineData("calle 59 # 80-12 edificio el roble", ComplementType.Edificio, "EL ROBLE")]
+    [InlineData("calle 59 # 80-12 edif. Central", ComplementType.Edificio, "CENTRAL")]
+    [InlineData("calle 59 # 80-12 barrio chapinero", ComplementType.Barrio, "CHAPINERO")]
+    [InlineData("calle 59 # 80-12 urbanización los pinos", ComplementType.Urbanizacion, "LOS PINOS")]
+    public void TryParse_NamedComplement_ReturnsNameAsValue(string input, ComplementType type, string value)
     {
         var parsed = AddressParser.TryParse(input, out var address);
 
@@ -271,6 +291,71 @@ public sealed class AddressParserTests
             new Complement(ComplementType.Conjunto, "LOS PINOS"),
             new Complement(ComplementType.Torre, "2"),
             new Complement(ComplementType.Apartamento, "302"));
+    }
+
+    [Fact]
+    public void TryParse_ApartmentThenBuilding_EndsBuildingNameAtNextKeyword()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 apto 501 edificio central of 3", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Apartamento, "501"),
+            new Complement(ComplementType.Edificio, "CENTRAL"),
+            new Complement(ComplementType.Oficina, "3"));
+    }
+
+    [Theory]
+    [InlineData("cra 7 # 10-20 Bogotá", "CRA 7 10 20")]
+    [InlineData("cra 7 # 10-20, Bogotá D.C.", "CRA 7 10 20")]
+    [InlineData("cra 7 # 10-20 apto 501 Medellín, Antioquia", "CRA 7 10 20 AP 501")]
+    [InlineData("calle 59 # 80-12 Santa Marta Magdalena Colombia", "CL 59 80 12")]
+    [InlineData("calle 59 # 80-12 barrio chapinero bogota", "CL 59 80 12 BR CHAPINERO")]
+    [InlineData("calle 59 # 80-12 barrio colombia", "CL 59 80 12 BR COLOMBIA")]
+    public void TryParse_TrailingCityOrDepartment_IgnoresLocation(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Fact]
+    public void TryParseWithUnrecognized_CityBeforeOtherText_KeepsCityInUnrecognizedText()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 bogota frente al parque", out _, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        unrecognizedText.Should().Be("bogota frente al parque");
+    }
+
+    [Fact]
+    public void TryParseWithUnrecognized_TextThenCity_DropsOnlyCity()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 frente al parque cali", out _, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        unrecognizedText.Should().Be("frente al parque");
+    }
+
+    [Fact]
+    public void TryParse_DashBetweenComplements_ReadsBothComplements()
+    {
+        var parsed = AddressParser.TryParse("cra 7 #10-20 apt 302 - torre 4", out var address);
+
+        parsed.Should().BeTrue();
+        address!.Complements.Should().Equal(
+            new Complement(ComplementType.Apartamento, "302"),
+            new Complement(ComplementType.Torre, "4"));
+    }
+
+    [Fact]
+    public void TryParseWithUnrecognized_TrailingDash_KeepsDashAsUnrecognized()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 apto 302 -", out _, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        unrecognizedText.Should().Be("-");
     }
 
     [Fact]
@@ -368,7 +453,7 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 apto 302 b c", "CL 59 80 12 AP 302B", "c")]
     [InlineData("calle 59 # 80-12 bis", "CL 59 80 12", "bis")]
     [InlineData("calle 59 # 80-12 apto 302 # 5", "CL 59 80 12 AP 302", "# 5")]
-    [InlineData("kr 7 este # 32-16 Edificio Azul", "CRA 7 ESTE 32 16", "edificio azul")]
+    [InlineData("kr 7 este # 32-16 Puerta Azul", "CRA 7 ESTE 32 16", "puerta azul")]
     public void TryParseWithUnrecognized_TrailingText_ReturnsRecognizedPartAndText(
         string input, string expected, string expectedUnrecognized)
     {
