@@ -383,21 +383,19 @@ public sealed class AddressParserTests
     }
 
     [Fact]
-    public void TryParseWithUnrecognized_CityBeforeOtherText_KeepsCityInUnrecognizedText()
+    public void Parse_CityBeforeOtherText_KeepsCityInUnrecognizedText()
     {
-        var parsed = AddressParser.TryParse("cra 7 # 10-20 bogota frente al parque", out _, out var unrecognizedText);
+        var outcome = AddressParser.Parse("cra 7 # 10-20 bogota frente al parque");
 
-        parsed.Should().BeTrue();
-        unrecognizedText.Should().Be("bogota frente al parque");
+        outcome!.UnrecognizedText.Should().Be("bogota frente al parque");
     }
 
     [Fact]
-    public void TryParseWithUnrecognized_TextThenCity_DropsOnlyCity()
+    public void Parse_TextThenCity_DropsOnlyCity()
     {
-        var parsed = AddressParser.TryParse("cra 7 # 10-20 frente al parque cali", out _, out var unrecognizedText);
+        var outcome = AddressParser.Parse("cra 7 # 10-20 frente al parque cali");
 
-        parsed.Should().BeTrue();
-        unrecognizedText.Should().Be("frente al parque");
+        outcome!.UnrecognizedText.Should().Be("frente al parque");
     }
 
     [Fact]
@@ -412,12 +410,11 @@ public sealed class AddressParserTests
     }
 
     [Fact]
-    public void TryParseWithUnrecognized_TrailingDash_KeepsDashAsUnrecognized()
+    public void Parse_TrailingDash_KeepsDashAsUnrecognized()
     {
-        var parsed = AddressParser.TryParse("cra 7 # 10-20 apto 302 -", out _, out var unrecognizedText);
+        var outcome = AddressParser.Parse("cra 7 # 10-20 apto 302 -");
 
-        parsed.Should().BeTrue();
-        unrecognizedText.Should().Be("-");
+        outcome!.UnrecognizedText.Should().Be("-");
     }
 
     [Fact]
@@ -497,13 +494,12 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12")]
     [InlineData("calle 59 # 80-12 apto 302")]
     [InlineData("calle 59 # 80-12 conjunto los pinos torre 2")]
-    public void TryParseWithUnrecognized_FullyRecognizedAddress_ReturnsEmptyUnrecognizedText(string input)
+    public void Parse_FullyRecognizedAddress_ReturnsEmptyUnrecognizedText(string input)
     {
-        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+        var outcome = AddressParser.Parse(input);
 
-        parsed.Should().BeTrue();
-        address.Should().NotBeNull();
-        unrecognizedText.Should().BeEmpty();
+        outcome.Should().NotBeNull();
+        outcome!.UnrecognizedText.Should().BeEmpty();
     }
 
     [Theory]
@@ -515,14 +511,13 @@ public sealed class AddressParserTests
     [InlineData("calle 59 # 80-12 bis", "CL 59 80 12", "bis")]
     [InlineData("calle 59 # 80-12 apto 302 # 5", "CL 59 80 12 AP 302", "# 5")]
     [InlineData("kr 7 este # 32-16 Puerta Azul", "CRA 7 ESTE 32 16", "puerta azul")]
-    public void TryParseWithUnrecognized_TrailingText_ReturnsRecognizedPartAndText(
+    public void Parse_TrailingText_ReturnsRecognizedPartAndText(
         string input, string expected, string expectedUnrecognized)
     {
-        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
+        var outcome = AddressParser.Parse(input);
 
-        parsed.Should().BeTrue();
-        AddressFormatter.Format(address!).Should().Be(expected);
-        unrecognizedText.Should().Be(expectedUnrecognized);
+        AddressFormatter.Format(outcome!.Address).Should().Be(expected);
+        outcome.UnrecognizedText.Should().Be(expectedUnrecognized);
     }
 
     [Theory]
@@ -531,13 +526,9 @@ public sealed class AddressParserTests
     [InlineData("calle 59 frente # 80-12")]
     [InlineData("frente calle 59 # 80-12")]
     [InlineData("av 68 sur este # 13-45")]
-    public void TryParseWithUnrecognized_IncompleteAddress_ReturnsFalse(string input)
+    public void Parse_IncompleteAddress_ReturnsFalse(string input)
     {
-        var parsed = AddressParser.TryParse(input, out var address, out var unrecognizedText);
-
-        parsed.Should().BeFalse();
-        address.Should().BeNull();
-        unrecognizedText.Should().BeEmpty();
+        AddressParser.Parse(input).Should().BeNull();
     }
 
     [Theory]

@@ -18,9 +18,9 @@ public static class AddressParser
     /// <returns><see langword="true"/> when the input was parsed; otherwise <see langword="false"/>.</returns>
     public static bool TryParse(string input, [NotNullWhen(true)] out Address? address)
     {
-        if (TryParse(input, out var parsed, out var unrecognizedText) && unrecognizedText.Length == 0)
+        if (Parse(input) is { UnrecognizedText.Length: 0 } outcome)
         {
-            address = parsed;
+            address = outcome.Address;
             return true;
         }
 
@@ -30,13 +30,11 @@ public static class AddressParser
 
     /// <summary>
     /// Like <see cref="TryParse(string, out Address?)"/>, but tolerates unrecognized text after the address: it
-    /// returns the recognized part and the normalized tokens that were left over, separated by spaces.
+    /// returns the recognized part and the normalized tokens that were left over, or <see langword="null"/> when
+    /// the input does not start with an address.
     /// </summary>
-    internal static bool TryParse(
-        string input, [NotNullWhen(true)] out Address? address, out string unrecognizedText)
+    internal static ParseOutcome? Parse(string input)
     {
-        address = null;
-        unrecognizedText = string.Empty;
         var tokens = AddressTokenizer.Tokenize(input);
         var position = 0;
 
@@ -45,7 +43,7 @@ public static class AddressParser
         if (!TryReadRoadType(tokens, ref position, out var roadType)
             || !TryReadRoad(tokens, ref position, ref roadType, quadrants, out var road))
         {
-            return false;
+            return null;
         }
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: true, quadrants);
@@ -53,7 +51,7 @@ public static class AddressParser
 
         if (!TryReadRoadNumber(tokens, ref position, out var cross))
         {
-            return false;
+            return null;
         }
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
@@ -61,7 +59,7 @@ public static class AddressParser
 
         if (!TryReadNumber(tokens, ref position, out var plateNumber))
         {
-            return false;
+            return null;
         }
 
         ReadQuadrants(tokens, ref position, writtenOnRoad: false, quadrants);
@@ -70,11 +68,11 @@ public static class AddressParser
 
         if (!QuadrantAssignment.TryAssign(roadType, quadrants, out var roadQuadrant, out var crossQuadrant))
         {
-            return false;
+            return null;
         }
 
-        unrecognizedText = string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
-        address = new Address(
+        var unrecognizedText = string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
+        var address = new Address(
             roadType,
             road with { Quadrant = roadQuadrant },
             cross with { Quadrant = crossQuadrant },
@@ -82,7 +80,7 @@ public static class AddressParser
         {
             Complements = complements,
         };
-        return true;
+        return new ParseOutcome(address, unrecognizedText);
     }
 
     private static int LocationSuffixStart(IReadOnlyList<string> tokens, int start)

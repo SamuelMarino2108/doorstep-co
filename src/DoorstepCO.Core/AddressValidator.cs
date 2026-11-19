@@ -30,7 +30,7 @@ public static class AddressValidator
             issues.Add(Issue(IssueCode.RuralAddress));
         }
 
-        if (!AddressParser.TryParse(input, out var address, out var unrecognizedText))
+        if (AddressParser.Parse(input) is not (var address, var unrecognizedText))
         {
             issues.Add(Issue(IssueCode.Unparseable));
             return Result(null, issues);
