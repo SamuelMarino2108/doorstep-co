@@ -305,6 +305,39 @@ public sealed class AddressParserTests
             new Complement(ComplementType.Oficina, "3"));
     }
 
+    [Theory]
+    [InlineData("cra 7 # 10-20 Bogotá", "CRA 7 10 20")]
+    [InlineData("cra 7 # 10-20, Bogotá D.C.", "CRA 7 10 20")]
+    [InlineData("cra 7 # 10-20 apto 501 Medellín, Antioquia", "CRA 7 10 20 AP 501")]
+    [InlineData("calle 59 # 80-12 Santa Marta Magdalena Colombia", "CL 59 80 12")]
+    [InlineData("calle 59 # 80-12 barrio chapinero bogota", "CL 59 80 12 BR CHAPINERO")]
+    [InlineData("calle 59 # 80-12 barrio colombia", "CL 59 80 12 BR COLOMBIA")]
+    public void TryParse_TrailingCityOrDepartment_IgnoresLocation(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Fact]
+    public void TryParseWithUnrecognized_CityBeforeOtherText_KeepsCityInUnrecognizedText()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 bogota frente al parque", out _, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        unrecognizedText.Should().Be("bogota frente al parque");
+    }
+
+    [Fact]
+    public void TryParseWithUnrecognized_TextThenCity_DropsOnlyCity()
+    {
+        var parsed = AddressParser.TryParse("cra 7 # 10-20 frente al parque cali", out _, out var unrecognizedText);
+
+        parsed.Should().BeTrue();
+        unrecognizedText.Should().Be("frente al parque");
+    }
+
     [Fact]
     public void TryParse_DashBetweenComplements_ReadsBothComplements()
     {

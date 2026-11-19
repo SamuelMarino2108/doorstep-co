@@ -10,7 +10,7 @@ namespace DoorstepCO.Core.Parsing;
 /// ("apto 302 - torre 4"). A letter after the number
 /// that is itself a complement keyword ("t" in "apto 302 t 2") starts the next complement instead.
 /// A conjunto, edificio, barrio or urbanización takes a name instead: every word up to the next complement
-/// keyword ("los pinos" in "conjunto los pinos torre 2").
+/// keyword or trailing city ("los pinos" in "conjunto los pinos torre 2", "chapinero" in "barrio chapinero bogota").
 /// Reading stops at the first token that does not start a complete complement; the caller decides what to do with
 /// the rest.
 /// </summary>
@@ -114,7 +114,8 @@ internal static class ComplementReader
         var words = new List<string>();
         while (position < tokens.Count
             && !ComplementKeywords.TryGetComplementType(tokens[position], out _)
-            && IsWord(tokens[position]))
+            && IsWord(tokens[position])
+            && !(words.Count > 0 && LocationKeywords.IsLocationSuffix(tokens, position)))
         {
             words.Add(tokens[position].ToUpperInvariant());
             position++;

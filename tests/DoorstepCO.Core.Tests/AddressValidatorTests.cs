@@ -90,6 +90,16 @@ public sealed class AddressValidatorTests
     }
 
     [Fact]
+    public void Validate_TrailingCity_ReturnsNoIssues()
+    {
+        var result = AddressValidator.Validate("Cra 7 # 10-20 apto 501, Bogotá D.C.");
+
+        result.Normalized.Should().Be("CRA 7 10 20 AP 501");
+        result.Confidence.Should().Be(1.0);
+        result.Issues.Should().BeEmpty();
+    }
+
+    [Fact]
     public void Validate_TrailingUnrecognizedText_StoresTextAsRemarks()
     {
         var result = AddressValidator.Validate("calle 59 # 80-12 frente al Párque");
