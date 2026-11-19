@@ -125,7 +125,7 @@ public static class AddressParser
         List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants,
         [NotNullWhen(true)] out RoadNumber? road)
     {
-        if (TryReadRoadNumber(tokens, ref position, out road))
+        if (TryReadRoadNumber(tokens, ref position, out road, isMainRoad: true))
         {
             return true;
         }
@@ -167,7 +167,7 @@ public static class AddressParser
         }
 
         position++;
-        road = ReadModifiers(tokens, ref position, number);
+        road = ReadModifiers(tokens, ref position, number, isMainRoad: true);
         return true;
     }
 
@@ -189,7 +189,10 @@ public static class AddressParser
         && !QuadrantKeywords.TryGetQuadrant(token, out _);
 
     private static bool TryReadRoadNumber(
-        IReadOnlyList<string> tokens, ref int position, [NotNullWhen(true)] out RoadNumber? road)
+        IReadOnlyList<string> tokens,
+        ref int position,
+        [NotNullWhen(true)] out RoadNumber? road,
+        bool isMainRoad = false)
     {
         road = null;
         if (!TryReadNumber(tokens, ref position, out var number))
@@ -197,13 +200,26 @@ public static class AddressParser
             return false;
         }
 
-        road = ReadModifiers(tokens, ref position, number);
+        road = ReadModifiers(tokens, ref position, number, isMainRoad);
         return true;
     }
 
-    private static RoadNumber ReadModifiers(IReadOnlyList<string> tokens, ref int position, int number)
+    /// <summary>
+    /// Reads what follows a road number: an ordinal suffix, letters and "bis". On the main road the letters may
+    /// be written after a dash ("calle 59-a"); elsewhere a dash separates the plate number.
+    /// </summary>
+    private static RoadNumber ReadModifiers(
+        IReadOnlyList<string> tokens, ref int position, int number, bool isMainRoad)
     {
         SkipIf(tokens, ref position, OrdinalKeywords.IsOrdinalSuffix);
+        if (isMainRoad
+            && position + 1 < tokens.Count
+            && tokens[position] == AddressTokenizer.Dash
+            && RoadLetters.TryGetLetter(tokens[position + 1], out _))
+        {
+            position++;
+        }
+
         var letter = ReadLetter(tokens, ref position);
         var isBis = position < tokens.Count && BisKeywords.IsBis(tokens[position]);
         char? bisLetter = null;

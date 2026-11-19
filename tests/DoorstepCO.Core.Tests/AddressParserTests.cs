@@ -77,6 +77,9 @@ public sealed class AddressParserTests
     [InlineData("calle 44 ae # 52-10", "CL 44AE 52 10")]
     [InlineData("Diagonal 74B # 33AA - 19", "DG 74B 33AA 19")]
     [InlineData("calle 59 ab bis # 80-12", "CL 59AB BIS 80 12")]
+    [InlineData("Calle 59-a # 80-12", "CL 59A 80 12")]
+    [InlineData("calle 59 - b bis # 80-12", "CL 59B BIS 80 12")]
+    [InlineData("Carrera 50-aa # 10-20", "CRA 50AA 10 20")]
     public void TryParse_LetterVariants_FormatsToStandardForm(string input, string expected)
     {
         var parsed = AddressParser.TryParse(input, out var address);
@@ -115,6 +118,14 @@ public sealed class AddressParserTests
 
         parsed.Should().BeTrue();
         AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("calle 59 80-a-12")]
+    [InlineData("calle 59-80-12")]
+    public void TryParse_DashOutsideMainRoadLetter_ReturnsFalse(string input)
+    {
+        AddressParser.TryParse(input, out _).Should().BeFalse();
     }
 
     [Theory]
