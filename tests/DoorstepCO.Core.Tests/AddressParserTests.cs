@@ -121,6 +121,20 @@ public sealed class AddressParserTests
     }
 
     [Theory]
+    [InlineData("Calle 13 norte # 5-20", "CL 13 5 20")]
+    [InlineData("Calle 100 # 15-20 Norte", "CL 100 15 20")]
+    [InlineData("Cra 15 # 100 norte - 20 apto 3", "CRA 15 100 20 AP 3")]
+    [InlineData("Av Boyacá Norte # 10-20", "AK 72 10 20")]
+    [InlineData("Calle 13 n 5-20", "CL 13 5 20")]
+    public void TryParse_Norte_DropsImplicitQuadrant(string input, string expected)
+    {
+        var parsed = AddressParser.TryParse(input, out var address);
+
+        parsed.Should().BeTrue();
+        AddressFormatter.Format(address!).Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("calle 59 80-a-12")]
     [InlineData("calle 59-80-12")]
     public void TryParse_DashOutsideMainRoadLetter_ReturnsFalse(string input)

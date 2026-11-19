@@ -186,7 +186,8 @@ public static class AddressParser
     private static bool IsNameWord(string token) =>
         char.IsLetter(token[0])
         && !PlateSeparatorKeywords.IsPlateSeparator(token)
-        && !QuadrantKeywords.TryGetQuadrant(token, out _);
+        && !QuadrantKeywords.TryGetQuadrant(token, out _)
+        && !ImplicitQuadrantKeywords.IsImplicitQuadrant(token);
 
     private static bool TryReadRoadNumber(
         IReadOnlyList<string> tokens,
@@ -238,9 +239,17 @@ public static class AddressParser
         bool writtenOnRoad,
         List<(Quadrant Quadrant, bool WrittenOnRoad)> quadrants)
     {
-        while (position < tokens.Count && QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+        while (position < tokens.Count)
         {
-            quadrants.Add((quadrant, writtenOnRoad));
+            if (QuadrantKeywords.TryGetQuadrant(tokens[position], out var quadrant))
+            {
+                quadrants.Add((quadrant, writtenOnRoad));
+            }
+            else if (!ImplicitQuadrantKeywords.IsImplicitQuadrant(tokens[position]))
+            {
+                return;
+            }
+
             position++;
         }
     }
