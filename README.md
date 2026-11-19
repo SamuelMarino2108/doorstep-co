@@ -37,10 +37,10 @@ using DoorstepCO.Core;
 
 var result = AddressValidator.Validate("cll 59 a bis sur # 80-12 apto 302 frente al parque");
 
-result.Normalized;  // "CL 59A BIS SUR 80 12 AP 302"
+result.Normalized;  // "CL 59A BIS SUR 80 12 AP 302 FRENTE AL PARQUE"
 result.Confidence;  // 0.7
 result.Issues;      // [UnrecognizedText: "frente al parque"]
-result.Address;     // RoadType, Road, Cross, PlateNumber and Complements
+result.Address;     // RoadType, Road, Cross, PlateNumber, Complements and Remarks
 ```
 
 `Confidence` goes from 0.0 (unusable) to 1.0 (no issues found). Each issue lowers it:
@@ -51,7 +51,7 @@ result.Address;     // RoadType, Road, Cross, PlateNumber and Complements
 | `Unparseable` | The input is not an urban address | 1.0 |
 | `RuralAddress` | Rural keywords such as vereda, finca or km (non-standard) | 0.8 |
 | `ZeroNumber` | The road, crossing road or plate number is 0 | 0.4 |
-| `UnrecognizedText` | Trailing text was ignored | 0.3 |
+| `UnrecognizedText` | Trailing text was not recognized; it is kept at the end of `Normalized` | 0.3 |
 | `PlateNumberOutOfRange` | The plate number is greater than 150 | 0.3 |
 | `NamedRoad` | The road is a name that could not be matched to its number, e.g. `av jimenez` | 0.2 |
 
@@ -97,14 +97,15 @@ curl -X POST http://localhost:5132/normalize \
     "road": { "number": 59, "letter": "A", "isBis": true, "bisLetter": null, "quadrant": "Sur", "name": null },
     "cross": { "number": 80, "letter": null, "isBis": false, "bisLetter": null, "quadrant": null, "name": null },
     "plateNumber": 12,
-    "complements": [{ "type": "Apartamento", "value": "302" }]
+    "complements": [{ "type": "Apartamento", "value": "302" }],
+    "remarks": "FRENTE AL PARQUE"
   },
-  "normalized": "CL 59A BIS SUR 80 12 AP 302",
+  "normalized": "CL 59A BIS SUR 80 12 AP 302 FRENTE AL PARQUE",
   "confidence": 0.7,
   "issues": [
     {
       "code": "UnrecognizedText",
-      "message": "Text after the address was not recognized and was ignored. \"frente al parque\""
+      "message": "Text after the address was not recognized and was kept as remarks. \"frente al parque\""
     }
   ]
 }

@@ -15,6 +15,13 @@ public sealed record Address(RoadType RoadType, RoadNumber Road, RoadNumber Cros
     /// </summary>
     public IReadOnlyList<Complement> Complements { get; init; } = [];
 
+    /// <summary>
+    /// Uppercase text written after the address that could not be recognized ("FRENTE AL PARQUE" in
+    /// "Calle 59 # 80-12 frente al parque"), kept so no delivery detail is lost, or <see langword="null"/> when
+    /// there is none.
+    /// </summary>
+    public string? Remarks { get; init; }
+
     /// <inheritdoc/>
     public bool Equals(Address? other) =>
         other is not null
@@ -22,7 +29,8 @@ public sealed record Address(RoadType RoadType, RoadNumber Road, RoadNumber Cros
         && Road == other.Road
         && Cross == other.Cross
         && PlateNumber == other.PlateNumber
-        && Complements.SequenceEqual(other.Complements);
+        && Complements.SequenceEqual(other.Complements)
+        && Remarks == other.Remarks;
 
     /// <inheritdoc/>
     public override int GetHashCode()
@@ -36,6 +44,8 @@ public sealed record Address(RoadType RoadType, RoadNumber Road, RoadNumber Cros
         {
             hash.Add(complement);
         }
+
+        hash.Add(Remarks);
 
         return hash.ToHashCode();
     }

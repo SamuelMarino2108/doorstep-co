@@ -11,7 +11,8 @@ public static class AddressFormatter
     /// <summary>
     /// Formats an address using DIAN-style abbreviations, e.g. "CL 59A BIS SUR 80 12". The quadrant of the
     /// main road follows the road; the quadrant of the crossing road follows the plate number, e.g.
-    /// "CRA 7 10 20 SUR". Complements go last, in their original order, e.g. "CRA 7 10 20 SUR TO 2 AP 302".
+    /// "CRA 7 10 20 SUR". Complements follow, in their original order, e.g. "CRA 7 10 20 SUR TO 2 AP 302", and
+    /// unrecognized remarks go last, e.g. "CL 10 5 51 FRENTE AL PARQUE".
     /// </summary>
     /// <param name="address">The address to format.</param>
     /// <returns>The standard text form of the address.</returns>
@@ -28,6 +29,11 @@ public static class AddressFormatter
         {
             parts.Add(ComplementAbbreviations.For(complement.Type));
             parts.Add(complement.Value);
+        }
+
+        if (address.Remarks is { } remarks)
+        {
+            parts.Add(remarks);
         }
 
         return string.Join(' ', parts);

@@ -40,6 +40,7 @@ public static class AddressValidator
         {
             issues.Add(new AddressIssue(
                 IssueCode.UnrecognizedText, IssueMessages.For(IssueCode.UnrecognizedText, unrecognizedText)));
+            address = address with { Remarks = unrecognizedText.ToUpperInvariant() };
         }
 
         var roadIsZero = address.Road.Number == 0 && address.Road.Name is null;

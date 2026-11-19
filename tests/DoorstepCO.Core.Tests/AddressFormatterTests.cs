@@ -108,4 +108,18 @@ public sealed class AddressFormatterTests
 
         formatted.Should().Be("AV EL POBLADO SUR 30 28");
     }
+
+    [Fact]
+    public void Format_AddressWithRemarks_WritesRemarksLast()
+    {
+        var address = new Address(RoadType.Calle, new RoadNumber(10), new RoadNumber(5), 51)
+        {
+            Complements = [new(ComplementType.Apartamento, "302")],
+            Remarks = "FRENTE AL PARQUE",
+        };
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be("CL 10 5 51 AP 302 FRENTE AL PARQUE");
+    }
 }
