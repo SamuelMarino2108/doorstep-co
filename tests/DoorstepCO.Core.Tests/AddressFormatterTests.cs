@@ -8,7 +8,7 @@ public sealed class AddressFormatterTests
     [InlineData(RoadType.Diagonal, 40, 20, 10, "DG 40 20 10")]
     [InlineData(RoadType.Transversal, 5, 10, 20, "TV 5 10 20")]
     [InlineData(RoadType.Avenida, 68, 13, 45, "AV 68 13 45")]
-    [InlineData(RoadType.AvenidaCalle, 26, 50, 1, "AC 26 50 1")]
+    [InlineData(RoadType.AvenidaCalle, 26, 50, 1, "AC 26 50 01")]
     [InlineData(RoadType.AvenidaCarrera, 15, 100, 20, "AK 15 100 20")]
     [InlineData(RoadType.Autopista, 45, 128, 50, "AU 45 128 50")]
     [InlineData(RoadType.Circular, 1, 70, 50, "CQ 1 70 50")]
@@ -17,6 +17,21 @@ public sealed class AddressFormatterTests
         RoadType roadType, int roadNumber, int crossNumber, int plateNumber, string expected)
     {
         var address = new Address(roadType, new RoadNumber(roadNumber), new RoadNumber(crossNumber), plateNumber);
+
+        var formatted = AddressFormatter.Format(address);
+
+        formatted.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(0, "CL 10 4 00")]
+    [InlineData(5, "CL 10 4 05")]
+    [InlineData(8, "CL 10 4 08")]
+    [InlineData(10, "CL 10 4 10")]
+    [InlineData(105, "CL 10 4 105")]
+    public void Format_PlateNumber_WritesAtLeastTwoDigits(int plateNumber, string expected)
+    {
+        var address = new Address(RoadType.Calle, new RoadNumber(10), new RoadNumber(4), plateNumber);
 
         var formatted = AddressFormatter.Format(address);
 
