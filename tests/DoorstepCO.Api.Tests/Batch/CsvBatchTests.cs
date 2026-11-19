@@ -28,7 +28,7 @@ public sealed class CsvBatchTests
         var output = Decode(CsvBatch.Normalize(Encoding.UTF8.GetBytes(input)));
 
         output.Should().EndWith(
-            ";1;CL 0 2 3 FRENTE AL PARQUE;0.30;\"" +
+            ";1;CL 0 2 03 FRENTE AL PARQUE;0.30;\"" +
             "Text after the address was not recognized and was kept as remarks. \"\"frente al parque\"\"; " +
             "The road, crossing road or plate number is 0.\"\r\n");
     }
@@ -74,7 +74,7 @@ public sealed class CsvBatchTests
         var output = Decode(CsvBatch.Normalize(Encoding.UTF8.GetBytes(input)));
 
         output.Should().Be(
-            "ID,DIRECCION,NORMALIZADA,CONFIANZA,PROBLEMAS\r\n1,,,,\r\n\r\n2,cll 1 # 2-3,CL 1 2 3,1.00,\r\n");
+            "ID,DIRECCION,NORMALIZADA,CONFIANZA,PROBLEMAS\r\n1,,,,\r\n\r\n2,cll 1 # 2-3,CL 1 2 03,1.00,\r\n");
     }
 
     [Fact]

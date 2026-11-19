@@ -72,7 +72,7 @@ public static class AddressParser
             return null;
         }
 
-        var unrecognizedText = string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
+        var unrecognizedText = UnrecognizedTail(tokens, stop);
         var address = new Address(
             roadType,
             road with { Quadrant = roadQuadrant },
@@ -83,6 +83,20 @@ public static class AddressParser
         };
         return new ParseOutcome(address, unrecognizedText, misspelledRoadType);
     }
+
+    /// <summary>
+    /// Reads an input made only of complements, with no road ("mz 4 casa 12"), or returns <see langword="null"/>
+    /// when the input does not start with a complement.
+    /// </summary>
+    internal static (IReadOnlyList<Complement> Complements, string UnrecognizedText)? ParseComplements(string input)
+    {
+        var tokens = AddressTokenizer.Tokenize(input);
+        var stop = ComplementReader.ReadValid(tokens, 0, out var complements);
+        return complements.Count == 0 ? null : (complements, UnrecognizedTail(tokens, stop));
+    }
+
+    private static string UnrecognizedTail(IReadOnlyList<string> tokens, int stop) =>
+        string.Join(' ', tokens.Skip(stop).Take(LocationSuffixStart(tokens, stop) - stop));
 
     private static int LocationSuffixStart(IReadOnlyList<string> tokens, int start)
     {

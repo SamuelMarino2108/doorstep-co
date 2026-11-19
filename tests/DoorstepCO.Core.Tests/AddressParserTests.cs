@@ -55,7 +55,7 @@ public sealed class AddressParserTests
     [InlineData("Avenida 68 # 13-45", "AV 68 13 45")]
     [InlineData("Avda. 68 # 13-45", "AV 68 13 45")]
     [InlineData("Ave 68 # 13-45", "AV 68 13 45")]
-    [InlineData("AC 26 # 50-01", "AC 26 50 1")]
+    [InlineData("AC 26 # 50-01", "AC 26 50 01")]
     [InlineData("ak 15 # 100-20", "AK 15 100 20")]
     [InlineData("K 7 # 10-20", "CRA 7 10 20")]
     [InlineData("Circular 1 # 70-50", "CQ 1 70 50")]
@@ -107,14 +107,14 @@ public sealed class AddressParserTests
     }
 
     [Theory]
-    [InlineData("Calle 1ra # 2-3", "CL 1 2 3")]
-    [InlineData("calle 1 ra # 2-3", "CL 1 2 3")]
-    [InlineData("Calle 1era # 2-3", "CL 1 2 3")]
+    [InlineData("Calle 1ra # 2-3", "CL 1 2 03")]
+    [InlineData("calle 1 ra # 2-3", "CL 1 2 03")]
+    [InlineData("Calle 1era # 2-3", "CL 1 2 03")]
     [InlineData("Calle 2da # 10-20", "CL 2 10 20")]
     [InlineData("Carrera 3er # 10-20", "CRA 3 10 20")]
     [InlineData("Carrera 4ta a # 10-20", "CRA 4A 10 20")]
-    [InlineData("Calle 1a # 2-3", "CL 1A 2 3")]
-    [InlineData("Calle Primera # 2-3", "CL 1 2 3")]
+    [InlineData("Calle 1a # 2-3", "CL 1A 2 03")]
+    [InlineData("Calle Primera # 2-3", "CL 1 2 03")]
     [InlineData("Carrera quinta bis # 10-20", "CRA 5 BIS 10 20")]
     [InlineData("Calle 10 # 1ra - 20", "CL 10 1 20")]
     public void TryParse_OrdinalRoadNumber_ReadsNumber(string input, string expected)

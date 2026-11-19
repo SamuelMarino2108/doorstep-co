@@ -32,8 +32,7 @@ public static class AddressValidator
 
         if (AddressParser.Parse(input) is not (var address, var unrecognizedText, var misspelledRoadType))
         {
-            issues.Add(Issue(IssueCode.Unparseable));
-            return Result(null, issues);
+            return ValidateWithoutRoad(input, issues);
         }
 
         if (misspelledRoadType is not null)
@@ -42,19 +41,20 @@ public static class AddressValidator
                 IssueCode.CorrectedTypo, IssueMessages.For(IssueCode.CorrectedTypo, misspelledRoadType)));
         }
 
-        if (unrecognizedText.Length > 0)
+        if (AddUnrecognizedTextIssue(issues, unrecognizedText) is { } remarks)
         {
-            var code = StartsWithComplementKeyword(unrecognizedText)
-                ? IssueCode.IncompleteComplement
-                : IssueCode.UnrecognizedText;
-            issues.Add(new AddressIssue(code, IssueMessages.For(code, unrecognizedText)));
-            address = address with { Remarks = unrecognizedText.ToUpperInvariant() };
+            address = address with { Remarks = remarks };
         }
 
         var roadIsZero = address.Road.Number == 0 && address.Road.Name is null;
         if (roadIsZero || address.Cross.Number == 0 || address.PlateNumber == 0)
         {
             issues.Add(Issue(IssueCode.ZeroNumber));
+        }
+
+        if (address.Road.Number > AddressLimits.MaxRoadNumber || address.Cross.Number > AddressLimits.MaxRoadNumber)
+        {
+            issues.Add(Issue(IssueCode.RoadNumberOutOfRange));
         }
 
         if (address.PlateNumber > AddressLimits.MaxPlateNumber)
@@ -68,6 +68,44 @@ public static class AddressValidator
         }
 
         return Result(address, issues);
+    }
+
+    /// <summary>
+    /// Validates an input that is not an urban address: one made only of complements ("mz 4 casa 12") is kept as a
+    /// non-standard address; anything else is unparseable.
+    /// </summary>
+    private static ValidationResult ValidateWithoutRoad(string input, List<AddressIssue> issues)
+    {
+        if (AddressParser.ParseComplements(input) is not { } parsed)
+        {
+            issues.Add(Issue(IssueCode.Unparseable));
+            return Result(null, issues);
+        }
+
+        issues.Add(Issue(IssueCode.NonStandardAddress));
+        var remarks = AddUnrecognizedTextIssue(issues, parsed.UnrecognizedText);
+        return new ValidationResult(
+            null,
+            AddressFormatter.FormatComplements(parsed.Complements, remarks),
+            IssuePenalties.ConfidenceFor(issues),
+            issues);
+    }
+
+    /// <summary>
+    /// Reports text left over after the address, if any, and returns it in uppercase to keep as remarks.
+    /// </summary>
+    private static string? AddUnrecognizedTextIssue(List<AddressIssue> issues, string unrecognizedText)
+    {
+        if (unrecognizedText.Length == 0)
+        {
+            return null;
+        }
+
+        var code = StartsWithComplementKeyword(unrecognizedText)
+            ? IssueCode.IncompleteComplement
+            : IssueCode.UnrecognizedText;
+        issues.Add(new AddressIssue(code, IssueMessages.For(code, unrecognizedText)));
+        return unrecognizedText.ToUpperInvariant();
     }
 
     private static bool StartsWithComplementKeyword(string text) =>

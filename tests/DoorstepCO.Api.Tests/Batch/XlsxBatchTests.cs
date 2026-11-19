@@ -69,7 +69,7 @@ public sealed class XlsxBatchTests
         sheet.Cell(2, 3).IsEmpty().Should().BeTrue();
         sheet.Cell(2, 4).IsEmpty().Should().BeTrue();
         sheet.Cell(2, 5).IsEmpty().Should().BeTrue();
-        sheet.Cell(3, 3).GetString().Should().Be("CL 1 2 3");
+        sheet.Cell(3, 3).GetString().Should().Be("CL 1 2 03");
     }
 
     [Fact]

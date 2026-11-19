@@ -15,7 +15,7 @@ public sealed class BatchFileTests
 
         result.FileName.Should().Be(expectedName);
         result.ContentType.Should().Be("text/csv");
-        Encoding.UTF8.GetString(result.Content).Should().Contain("CL 1 2 3");
+        Encoding.UTF8.GetString(result.Content).Should().Contain("CL 1 2 03");
     }
 
     [Fact]

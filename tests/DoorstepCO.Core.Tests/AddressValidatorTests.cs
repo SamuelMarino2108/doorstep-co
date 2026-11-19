@@ -176,10 +176,10 @@ public sealed class AddressValidatorTests
     }
 
     [Theory]
-    [InlineData("calle 59 # 80-151")]
+    [InlineData("calle 59 # 80-251")]
     [InlineData("calle 59 # 80-850")]
     [InlineData("calle 59 # 80-9999")]
-    public void Validate_PlateNumberAbove150_ReturnsPlateNumberOutOfRangeIssue(string input)
+    public void Validate_PlateNumberAbove250_ReturnsPlateNumberOutOfRangeIssue(string input)
     {
         var result = AddressValidator.Validate(input);
 
@@ -191,10 +191,72 @@ public sealed class AddressValidatorTests
     [Theory]
     [InlineData("calle 59 # 80-1")]
     [InlineData("calle 59 # 80-150")]
+    [InlineData("cr 43a # 1 sur - 188")]
+    [InlineData("calle 59 # 80-250")]
     [InlineData("calle 200 # 300-99")]
-    public void Validate_PlateNumberUpTo150_ReturnsNoIssues(string input)
+    public void Validate_PlateNumberUpTo250_ReturnsNoIssues(string input)
     {
         AddressValidator.Validate(input).Issues.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData("mz 4 casa 12", "MZ 4 CA 12")]
+    [InlineData("Manzana 4 lote 12", "MZ 4 LT 12")]
+    [InlineData("Mz 4 Casa 12 Barrio El Bosque", "MZ 4 CA 12 BR EL BOSQUE")]
+    [InlineData("Barrio Las Palmas Casa 12, Cartagena", "BR LAS PALMAS CA 12")]
+    public void Validate_OnlyComplements_ReturnsNonStandardAddressWithComplements(string input, string expected)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Address.Should().BeNull();
+        result.Normalized.Should().Be(expected);
+        result.Confidence.Should().Be(0.2);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.NonStandardAddress);
+    }
+
+    [Fact]
+    public void Validate_OnlyComplementsWithTrailingText_KeepsTextAsRemarks()
+    {
+        var result = AddressValidator.Validate("mz 4 casa 12 frente a la tienda");
+
+        result.Normalized.Should().Be("MZ 4 CA 12 FRENTE A LA TIENDA");
+        result.Confidence.Should().Be(0.0);
+        result.Issues.Select(issue => issue.Code).Should().Equal(
+            IssueCode.NonStandardAddress, IssueCode.UnrecognizedText);
+    }
+
+    [Theory]
+    [InlineData("frente al parque")]
+    [InlineData("apto")]
+    [InlineData("casa blanca # 12")]
+    public void Validate_NeitherAddressNorComplements_ReturnsUnparseable(string input)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Normalized.Should().BeNull();
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.Unparseable);
+    }
+
+    [Theory]
+    [InlineData("calle 301 # 80-12")]
+    [InlineData("calle 80 # 1000-12")]
+    [InlineData("calle 500 # 400-12")]
+    public void Validate_RoadOrCrossAbove300_ReturnsSingleRoadNumberOutOfRangeIssue(string input)
+    {
+        var result = AddressValidator.Validate(input);
+
+        result.Address.Should().NotBeNull();
+        result.Confidence.Should().Be(0.7);
+        result.Issues.Select(issue => issue.Code).Should().Equal(IssueCode.RoadNumberOutOfRange);
+    }
+
+    [Theory]
+    [InlineData("calle 300 # 300-12")]
+    [InlineData("av el poblado # 300-12")]
+    public void Validate_RoadAndCrossUpTo300_ReturnsNoRoadNumberOutOfRangeIssue(string input)
+    {
+        AddressValidator.Validate(input).Issues.Select(issue => issue.Code)
+            .Should().NotContain(IssueCode.RoadNumberOutOfRange);
     }
 
     [Fact]

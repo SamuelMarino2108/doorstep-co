@@ -17,6 +17,10 @@ internal static class IssueMessages
         IssueCode.IncompleteComplement =>
             "A complement has no value or its value was not recognized; the text was kept as remarks.",
         IssueCode.CorrectedTypo => "The road type looked misspelled and was corrected.",
+        IssueCode.RoadNumberOutOfRange =>
+            $"The road or crossing road number is greater than {AddressLimits.MaxRoadNumber}.",
+        IssueCode.NonStandardAddress =>
+            "The address has no road, only complements, and does not follow the standard urban nomenclature.",
         _ => throw new ArgumentOutOfRangeException(nameof(code), code, null),
     };
 

@@ -44,4 +44,13 @@ public enum IssueCode
     /// The road type was misspelled and corrected, e.g. "carrerra" read as carrera in "Carrerra 7 # 10-20".
     /// </summary>
     CorrectedTypo,
+
+    /// <summary>The road or the crossing road number is suspiciously high, e.g. "Calle 80 # 1000-12".</summary>
+    RoadNumberOutOfRange,
+
+    /// <summary>
+    /// The address has no road and is made only of complements, e.g. "Mz 4 Casa 12". It does not follow the
+    /// standard urban nomenclature; the complements are kept in the normalized text.
+    /// </summary>
+    NonStandardAddress,
 }
