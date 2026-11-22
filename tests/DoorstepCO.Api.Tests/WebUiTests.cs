@@ -22,6 +22,14 @@ public sealed class WebUiTests : IClassFixture<WebApplicationFactory<Program>>
         (await response.Content.ReadAsStringAsync()).Should().Contain("<title>Doorstep CO</title>");
     }
 
+    [Fact]
+    public async Task GetRoot_WhenCalled_LinksToSwaggerUi()
+    {
+        var response = await _client.GetAsync("/");
+
+        (await response.Content.ReadAsStringAsync()).Should().Contain("href=\"swagger\"");
+    }
+
     [Theory]
     [InlineData("/styles.css", "text/css")]
     [InlineData("/app.js", "text/javascript")]
