@@ -14,6 +14,15 @@ addresses are caught before a shipment is dispatched.
 Every address comes back with its structured components, a confidence score and a list of detected issues.
 Parsing is deterministic and rule-based: no AI, no external services, no dependencies.
 
+## Live demo
+
+**[doorstep-co.onrender.com](https://doorstep-co.onrender.com/)**: web UI to normalize one address or upload a `.csv`/`.xlsx` file. The
+`POST /normalize`, `POST /normalize/batch` and `/health` endpoints are available at the same URL.
+
+> [!NOTE]
+> The demo runs on Render's free plan. The instance goes to sleep after 15 minutes without traffic, so the
+> first request can take up to a minute while it wakes up. After that, responses are immediate.
+
 ## What it understands
 
 | Feature | Examples |
@@ -95,7 +104,7 @@ The API listens on http://localhost:8080.
 | `POST /normalize` | Normalize a single address |
 | `POST /normalize/batch` | Normalize a `.csv` or `.xlsx` file |
 | `/health` | Health check |
-| `/swagger` | Swagger UI (Development environment) |
+| `/swagger` | Swagger UI (Development environment only; not available on the live demo) |
 
 ### `POST /normalize`
 
