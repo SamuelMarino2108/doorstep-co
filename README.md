@@ -16,8 +16,9 @@ Parsing is deterministic and rule-based: no AI, no external services, no depende
 
 ## Live demo
 
-**[doorstep-co.onrender.com](https://doorstep-co.onrender.com/)**: web UI to normalize one address or upload a `.csv`/`.xlsx` file. The
-`POST /normalize`, `POST /normalize/batch` and `/health` endpoints are available at the same URL.
+**[doorstep-co.onrender.com](https://doorstep-co.onrender.com/)**: web UI to normalize one address or upload a `.csv`/`.xlsx` file.
+To explore and try the API, open **[Swagger UI](https://doorstep-co.onrender.com/swagger)** or use the
+*Ver la API* button in the web UI.
 
 > [!NOTE]
 > The demo runs on Render's free plan. The instance goes to sleep after 15 minutes without traffic, so the
@@ -104,7 +105,7 @@ The API listens on http://localhost:8080.
 | `POST /normalize` | Normalize a single address |
 | `POST /normalize/batch` | Normalize a `.csv` or `.xlsx` file |
 | `/health` | Health check |
-| `/swagger` | Swagger UI (Development environment only; not available on the live demo) |
+| `/swagger` | Swagger UI to explore and try the API |
 
 ### `POST /normalize`
 
