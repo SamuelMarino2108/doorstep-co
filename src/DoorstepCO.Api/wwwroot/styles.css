@@ -165,6 +165,20 @@ input[type="text"]:focus-visible,
     font-size: 0.875rem;
 }
 
+a.button {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.masthead-actions {
+    margin-top: 20px;
+}
+
+.button.ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
 .button.wide {
     width: 100%;
     margin-top: 12px;
